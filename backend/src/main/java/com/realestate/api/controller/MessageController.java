@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+
 @RestController
 @RequestMapping("/api/messages")
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class MessageController {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final PropertyRepository propertyRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping
     public ResponseEntity<?> sendMessage(@RequestBody Map<String, Object> body) {
@@ -47,7 +50,16 @@ public class MessageController {
             propertyRepository.findById(propertyId).ifPresent(msg::setProperty);
         }
 
-        return ResponseEntity.ok(messageRepository.save(msg));
+        Message savedMsg = messageRepository.save(msg);
+
+        // Broadcast a través de WebSocket al receptor
+        messagingTemplate.convertAndSendToUser(
+                receiverId.toString(),
+                "/queue/messages",
+                savedMsg
+        );
+
+        return ResponseEntity.ok(savedMsg);
     }
 
     // GET conversación con otro usuario

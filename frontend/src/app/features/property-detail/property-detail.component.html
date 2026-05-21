@@ -196,7 +196,7 @@
 
   <!-- CHAT TAB -->
   <div class="drawer-content chat-container" *ngIf="activeTab === 'CHAT'">
-    <div class="chat-messages">
+    <div class="chat-messages" #chatScroll>
       <div class="message" *ngFor="let msg of messages" [class.sent]="msg.sender?.id !== property?.agent?.id">
         <p>{{ msg.content }}</p>
         <span class="msg-time">{{ msg.createdAt | date:'shortTime' }}</span>

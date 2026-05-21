@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { BookingService } from '../../core/services/booking.service';
 import { VisitService } from '../../core/services/visit.service';
 import { MessageService } from '../../core/services/message.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-property-detail',
@@ -42,7 +43,8 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
   // Chat State
   messages: any[] = [];
   chatInput = '';
-  chatPollingInterval: any;
+  private wsSubscription?: Subscription;
+  @ViewChild('chatScroll') private chatScrollContainer?: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -54,7 +56,7 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    this.isLoggedIn = this.authService.isLoggedIn();
+    this.isLoggedIn = !!this.authService.getToken();
   }
 
   ngOnInit(): void {
@@ -74,10 +76,32 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
         }
       });
     }
+
+    // Comprobar si venimos de un pago exitoso
+    this.route.queryParams.subscribe(params => {
+      if (params['payment'] === 'cancelled') {
+        alert('El pago fue cancelado. Puedes intentarlo de nuevo.');
+      }
+    });
   }
 
   ngOnDestroy(): void {
-    this.stopChatPolling();
+    if (this.wsSubscription) {
+      this.wsSubscription.unsubscribe();
+    }
+    this.messageService.disconnect();
+  }
+
+  ngAfterViewChecked() {
+    this.scrollToBottom();
+  }
+
+  scrollToBottom(): void {
+    try {
+      if (this.chatScrollContainer) {
+        this.chatScrollContainer.nativeElement.scrollTop = this.chatScrollContainer.nativeElement.scrollHeight;
+      }
+    } catch(err) { }
   }
 
   setActiveImage(url: string): void {
@@ -106,7 +130,10 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
 
   closeDrawer() {
     this.activeDrawer = 'NONE';
-    this.stopChatPolling();
+    if (this.wsSubscription) {
+      this.wsSubscription.unsubscribe();
+      this.wsSubscription = undefined;
+    }
   }
 
   // --- Booking ---
@@ -135,9 +162,23 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
       totalAmount: this.bookingTotalAmount,
       paymentMethod: this.bookingPaymentMethod
     }).subscribe({
-      next: () => {
-        this.bookingLoading = false;
-        this.bookingSuccess = true;
+      next: (bookingResponse) => {
+        if (this.bookingPaymentMethod === 'CARD') {
+          this.bookingService.createCheckoutSession(bookingResponse.id).subscribe({
+            next: (res) => {
+              if (res.url) {
+                window.location.href = res.url;
+              }
+            },
+            error: (err) => {
+              console.error('Error con Stripe:', err);
+              this.bookingLoading = false;
+            }
+          });
+        } else {
+          this.bookingLoading = false;
+          this.bookingSuccess = true;
+        }
       },
       error: (err) => {
         console.error(err);
@@ -170,7 +211,7 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
   openChatTab() {
     this.activeTab = 'CHAT';
     this.loadMessages();
-    this.startChatPolling();
+    this.startChatWebSocket();
   }
 
   loadMessages() {
@@ -200,18 +241,22 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  startChatPolling() {
-    if (isPlatformBrowser(this.platformId) && !this.chatPollingInterval) {
-      this.chatPollingInterval = setInterval(() => {
-        this.loadMessages();
-      }, 5000);
-    }
-  }
-
-  stopChatPolling() {
-    if (this.chatPollingInterval) {
-      clearInterval(this.chatPollingInterval);
-      this.chatPollingInterval = null;
+  startChatWebSocket() {
+    const token = this.authService.getToken();
+    if (token && isPlatformBrowser(this.platformId)) {
+      this.messageService.connect(token);
+      
+      if (!this.wsSubscription) {
+        this.wsSubscription = this.messageService.onMessageReceived$.subscribe(msg => {
+          if (this.property?.agent?.id && (msg.sender.id === this.property.agent.id || msg.receiver.id === this.property.agent.id)) {
+            const exists = this.messages.find(m => m.id === msg.id);
+            if (!exists) {
+              this.messages.push(msg);
+              this.scrollToBottom();
+            }
+          }
+        });
+      }
     }
   }
 }
