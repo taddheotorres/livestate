@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
 import { VisitService } from '../../../core/services/visit.service';
 import { FavoriteService } from '../../../core/services/favorite.service';
@@ -196,10 +196,16 @@ export class TenantDashboardComponent implements OnInit {
   constructor(
     private bookingService: BookingService,
     private visitService: VisitService,
-    private favoriteService: FavoriteService
+    private favoriteService: FavoriteService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['payment'] === 'success') {
+        alert('¡Pago completado con éxito! Tu reserva está procesándose.');
+      }
+    });
     this.favoriteService.getMyFavorites().subscribe({
       next: (data) => { this.favorites = data; this.loadingFavorites = false; },
       error: () => { this.loadingFavorites = false; }

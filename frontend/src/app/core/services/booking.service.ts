@@ -30,4 +30,8 @@ export class BookingService {
   updateBookingStatus(id: number, status: 'CONFIRMED' | 'CANCELLED'): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/${id}/status`, { status });
   }
+
+  createCheckoutSession(bookingId: number): Observable<{ url: string }> {
+    return this.http.post<{ url: string }>('http://localhost:8081/api/payments/create-checkout-session', { bookingId });
+  }
 }
