@@ -1,9 +1,9 @@
 <div class="form-page-container">
   
   <div class="form-header-bar">
-    <a routerLink="/" class="back-link">&larr; Volver a la colección</a>
-    <h1 class="page-title">Publicar un Nuevo Espacio</h1>
-    <p class="page-subtitle">Rellena los datos a la derecha para ver la previsualización en vivo de tu diseño minimalista.</p>
+    <a [routerLink]="editMode ? '/dashboard' : '/'" class="back-link">&larr; {{ editMode ? 'Volver al dashboard' : 'Volver a la colección' }}</a>
+    <h1 class="page-title">{{ editMode ? 'Editar Espacio' : 'Publicar un Nuevo Espacio' }}</h1>
+    <p class="page-subtitle">{{ editMode ? 'Modifica los datos de tu propiedad.' : 'Rellena los datos a la derecha para ver la previsualización en vivo de tu diseño minimalista.' }}</p>
   </div>
 
   <div class="two-columns-layout">
@@ -225,7 +225,7 @@
         <!-- Acciones del formulario -->
         <div class="form-actions">
           <button type="submit" class="btn btn-primary btn-block btn-large" [disabled]="!propertyForm.form.valid || uploadedImages.length === 0 || isSubmitting">
-            {{ isSubmitting ? 'Publicando Espacio...' : 'Publicar Espacio' }}
+            {{ isSubmitting ? (editMode ? 'Guardando cambios...' : 'Publicando Espacio...') : (editMode ? 'Guardar Cambios' : 'Publicar Espacio') }}
           </button>
         </div>
 

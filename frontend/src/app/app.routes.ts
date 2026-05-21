@@ -17,6 +17,7 @@ export const routes: Routes = [
 
   { path: 'register', component: RegisterComponent },
   { path: 'properties/new', component: PropertyFormComponent, canActivate: [authGuard] },
+  { path: 'properties/:id/edit', component: PropertyFormComponent, canActivate: [authGuard] },
   { path: 'properties/:id', component: PropertyDetailComponent },
   { path: 'agents/:id', component: AgentProfileComponent },
   { path: '**', redirectTo: '' }

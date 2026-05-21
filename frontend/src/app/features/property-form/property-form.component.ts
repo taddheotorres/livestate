@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { PropertyService } from '../../core/services/property.service';
 
 @Component({
@@ -30,6 +30,8 @@ export class PropertyFormComponent implements OnInit {
   activePreviewImageIndex = 0;
   isDragging = false;
   currentUser: any = null;
+  editMode = false;
+  editId: number | null = null;
 
   // Presets de fotos de ejemplo para testing rápido
   photoPresets = [
@@ -64,16 +66,54 @@ export class PropertyFormComponent implements OnInit {
 
   constructor(
     private propertyService: PropertyService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    // Detectar si es modo edición
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      this.editMode = true;
+      this.editId = +idParam;
+      this.loadPropertyForEdit(this.editId);
+    }
+
     this.propertyService.getCurrentUser().subscribe({
       next: (user) => {
         this.currentUser = user;
       },
       error: (err) => {
         console.warn('Usuario no autenticado para previsualización, usando Nelva Torres como fallback.', err);
+      }
+    });
+  }
+
+  loadPropertyForEdit(id: number) {
+    this.propertyService.getPropertyById(id).subscribe({
+      next: (data) => {
+        this.property = {
+          title: data.title,
+          location: data.location,
+          type: data.type,
+          price: data.price,
+          bedrooms: data.bedrooms,
+          bathrooms: data.bathrooms,
+          areaSqm: data.areaSqm,
+          description: data.description,
+          status: data.status
+        };
+        // Cargar imágenes existentes
+        if (data.images && data.images.length > 0) {
+          this.uploadedImages = data.images.map((img: any) => ({
+            imageUrl: img.imageUrl,
+            isPrimary: img.isPrimary
+          }));
+        }
+      },
+      error: (err) => {
+        console.error('Error cargando propiedad para editar:', err);
+        this.router.navigate(['/dashboard']);
       }
     });
   }
@@ -194,16 +234,32 @@ export class PropertyFormComponent implements OnInit {
       this.property.images = [];
     }
 
-    this.propertyService.createProperty(this.property).subscribe({
-      next: (res) => {
-        this.isSubmitting = false;
-        this.router.navigate(['/properties', res.id]);
-      },
-      error: (err) => {
-        console.error('Error al publicar espacio:', err);
-        this.isSubmitting = false;
-        alert('Hubo un error al publicar el espacio. Revisa los datos de entrada.');
-      }
-    });
+    if (this.editMode && this.editId) {
+      // MODO EDICIÓN
+      this.propertyService.updateProperty(this.editId, this.property).subscribe({
+        next: (res) => {
+          this.isSubmitting = false;
+          this.router.navigate(['/properties', res.id]);
+        },
+        error: (err) => {
+          console.error('Error al actualizar espacio:', err);
+          this.isSubmitting = false;
+          alert('Hubo un error al actualizar el espacio.');
+        }
+      });
+    } else {
+      // MODO CREACIÓN
+      this.propertyService.createProperty(this.property).subscribe({
+        next: (res) => {
+          this.isSubmitting = false;
+          this.router.navigate(['/properties', res.id]);
+        },
+        error: (err) => {
+          console.error('Error al publicar espacio:', err);
+          this.isSubmitting = false;
+          alert('Hubo un error al publicar el espacio. Revisa los datos de entrada.');
+        }
+      });
+    }
   }
 }

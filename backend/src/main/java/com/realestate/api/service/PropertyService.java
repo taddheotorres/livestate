@@ -29,6 +29,33 @@ public class PropertyService {
         return propertyRepository.save(property);
     }
 
+    public Property updateProperty(Long id, Property updated) {
+        return propertyRepository.findById(id)
+                .map(existing -> {
+                    existing.setTitle(updated.getTitle());
+                    existing.setDescription(updated.getDescription());
+                    existing.setPrice(updated.getPrice());
+                    existing.setLocation(updated.getLocation());
+                    existing.setBedrooms(updated.getBedrooms());
+                    existing.setBathrooms(updated.getBathrooms());
+                    existing.setAreaSqm(updated.getAreaSqm());
+                    existing.setType(updated.getType());
+                    existing.setStatus(updated.getStatus());
+
+                    // Reemplazar imágenes si vienen nuevas
+                    if (updated.getImages() != null) {
+                        existing.getImages().clear();
+                        updated.getImages().forEach(img -> {
+                            img.setProperty(existing);
+                            existing.getImages().add(img);
+                        });
+                    }
+
+                    return propertyRepository.save(existing);
+                })
+                .orElseThrow(() -> new RuntimeException("Propiedad no encontrada con id: " + id));
+    }
+
     public void deleteProperty(Long id) {
         propertyRepository.deleteById(id);
     }
