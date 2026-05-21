@@ -1,11 +1,19 @@
 <div class="property-card" *ngIf="property" [routerLink]="['/properties', property.id]">
   <!-- Imagen real si existe -->
-  <div class="card-image-wrapper" *ngIf="property.images && property.images.length > 0">
-    <img class="card-image" [src]="property.images[0].imageUrl" [alt]="property.title">
-  </div>
-  <!-- Placeholder si no hay imagen -->
-  <div class="card-image-placeholder" *ngIf="!property.images || property.images.length === 0">
-    <span class="placeholder-text">SIN IMAGEN</span>
+  <div class="card-image-wrapper">
+    <img *ngIf="property.images && property.images.length > 0" class="card-image" [src]="property.images[0].imageUrl" [alt]="property.title">
+    
+    <!-- Placeholder si no hay imagen -->
+    <div class="card-image-placeholder" *ngIf="!property.images || property.images.length === 0">
+      <span class="placeholder-text">SIN IMAGEN</span>
+    </div>
+
+    <!-- Botón de Favorito -->
+    <button class="favorite-btn" [class.active]="isFavorite" (click)="toggleFavorite($event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M11.9996 21.0541C-8 10 5.99999 -2 11.9996 5.58806C18 -2 32 10 11.9996 21.0541Z" [attr.fill]="isFavorite ? 'currentColor' : 'none'"/>
+      </svg>
+    </button>
   </div>
 
   <div class="card-content">

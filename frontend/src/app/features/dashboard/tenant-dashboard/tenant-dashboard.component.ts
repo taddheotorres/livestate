@@ -1,19 +1,46 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
 import { VisitService } from '../../../core/services/visit.service';
+import { FavoriteService } from '../../../core/services/favorite.service';
+import { PropertyCardComponent } from '../../../shared/components/property-card/property-card.component';
 
 @Component({
   selector: 'app-tenant-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule, PropertyCardComponent],
   template: `
     <div class="dashboard-panel">
       <h2>Panel de Inquilino</h2>
-      <p class="subtitle">Gestiona tus solicitudes de renta y visitas programadas.</p>
+      <p class="subtitle">Gestiona tus favoritos, solicitudes de renta y visitas programadas.</p>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab" [class.active]="activeTab === 'favorites'" (click)="activeTab = 'favorites'">
+          Mis Favoritos <span class="tab-count" *ngIf="favorites.length">{{ favorites.length }}</span>
+        </button>
+        <button class="tab" [class.active]="activeTab === 'bookings'" (click)="activeTab = 'bookings'">
+          Solicitudes de Renta <span class="tab-count" *ngIf="bookings.length">{{ bookings.length }}</span>
+        </button>
+        <button class="tab" [class.active]="activeTab === 'visits'" (click)="activeTab = 'visits'">
+          Visitas Agendadas <span class="tab-count" *ngIf="visits.length">{{ visits.length }}</span>
+        </button>
+      </div>
+
+      <!-- SECCIÓN: FAVORITOS -->
+      <div class="dashboard-section" *ngIf="activeTab === 'favorites'">
+        <div class="favorites-grid" *ngIf="favorites.length > 0">
+          <app-property-card *ngFor="let fav of favorites" [property]="fav"></app-property-card>
+        </div>
+        <div class="empty-state" *ngIf="favorites.length === 0 && !loadingFavorites">
+          <p>Aún no tienes propiedades favoritas.</p>
+          <a routerLink="/catalog" class="btn btn-primary mt-3">Explorar propiedades</a>
+        </div>
+      </div>
 
       <!-- SECCIÓN: RESERVAS -->
-      <div class="dashboard-section">
+      <div class="dashboard-section" *ngIf="activeTab === 'bookings'">
         <h3>Tus Solicitudes de Renta</h3>
         <div class="items-list" *ngIf="bookings.length > 0">
           <div class="item-card" *ngFor="let b of bookings">
@@ -33,7 +60,7 @@ import { VisitService } from '../../../core/services/visit.service';
       </div>
 
       <!-- SECCIÓN: VISITAS -->
-      <div class="dashboard-section mt-4">
+      <div class="dashboard-section" *ngIf="activeTab === 'visits'">
         <h3>Tus Visitas Agendadas</h3>
         <div class="items-list" *ngIf="visits.length > 0">
           <div class="item-card" *ngFor="let v of visits">
@@ -59,13 +86,57 @@ import { VisitService } from '../../../core/services/visit.service';
     }
     h2 { font-size: 1.8rem; margin-bottom: 0.25rem; }
     .subtitle { color: var(--text-secondary); margin-bottom: 2rem; }
+    .mt-3 { margin-top: 1rem; display: inline-block; }
     .mt-4 { margin-top: 2rem; }
     
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border-light);
+      margin-bottom: 2rem;
+    }
+    .tab {
+      background: none;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &:hover { color: var(--text-primary); }
+      &.active {
+        color: var(--text-primary);
+        border-bottom-color: var(--brand-primary, #95606B);
+        font-weight: 500;
+      }
+    }
+    .tab-count {
+      background: var(--brand-primary, #95606B);
+      color: white;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
     .dashboard-section h3 {
       font-size: 1.2rem;
       margin-bottom: 1rem;
       border-bottom: 1px solid var(--border-light);
       padding-bottom: 0.5rem;
+    }
+
+    .favorites-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
     }
 
     .items-list {
@@ -112,17 +183,27 @@ import { VisitService } from '../../../core/services/visit.service';
   `]
 })
 export class TenantDashboardComponent implements OnInit {
+  activeTab: 'favorites' | 'bookings' | 'visits' = 'favorites';
+  
   bookings: any[] = [];
   visits: any[] = [];
+  favorites: any[] = [];
+  
   loadingBookings = true;
   loadingVisits = true;
+  loadingFavorites = true;
 
   constructor(
     private bookingService: BookingService,
-    private visitService: VisitService
+    private visitService: VisitService,
+    private favoriteService: FavoriteService
   ) {}
 
   ngOnInit() {
+    this.favoriteService.getMyFavorites().subscribe({
+      next: (data) => { this.favorites = data; this.loadingFavorites = false; },
+      error: () => { this.loadingFavorites = false; }
+    });
     this.bookingService.getMyBookings().subscribe({
       next: (data) => { this.bookings = data; this.loadingBookings = false; },
       error: () => { this.loadingBookings = false; }
