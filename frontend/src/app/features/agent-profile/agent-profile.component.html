@@ -1,0 +1,164 @@
+<div class="profile-container" *ngIf="!loading && agent">
+  
+  <div class="profile-header-bar">
+    <a routerLink="/" class="back-link">&larr; Volver a la colección</a>
+  </div>
+
+  <div class="profile-grid">
+    
+    <!-- COLUMNA IZQUIERDA: Tarjeta de Presentación y Métricas -->
+    <div class="agent-card">
+      <div class="avatar-wrapper">
+        <div class="avatar-large">{{ (isEditing ? editForm.name : agent.name).charAt(0) }}</div>
+        <div class="badge-recommended" *ngIf="agent.recommended">Recommended Host</div>
+      </div>
+
+      <!-- Nombre (Modo Normal vs Modo Edición) -->
+      <ng-container *ngIf="!isEditing">
+        <h1 class="agent-name">{{ agent.name }}</h1>
+        <p class="agent-role">Anfitrión Verificado</p>
+      </ng-container>
+
+      <ng-container *ngIf="isEditing">
+        <div class="edit-name-group">
+          <label for="edit-name">Nombre</label>
+          <input 
+            type="text" 
+            id="edit-name" 
+            [(ngModel)]="editForm.name" 
+            name="name" 
+            class="input-field edit-name-input"
+            required
+          >
+        </div>
+      </ng-container>
+
+      <!-- Calificación General -->
+      <div class="rating-stars" *ngIf="agent.rating">
+        <span class="stars">
+          <span *ngFor="let star of getStars(agent.rating)">★</span>
+        </span>
+        <span class="rating-value">{{ agent.rating | number:'1.1-1' }}</span>
+        <span class="reviews-count">({{ agent.reviewsCount || 0 }} reseñas)</span>
+      </div>
+
+      <!-- Métricas en tarjetas -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-num">{{ agent.reviewsCount || 0 }}</span>
+          <span class="metric-label">Reseñas</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-num">8+</span>
+          <span class="metric-label">Años Exp.</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-num">{{ agentProperties.length }}</span>
+          <span class="metric-label">Espacios</span>
+        </div>
+      </div>
+
+      <!-- Botones de Acción para Perfil Propio -->
+      <ng-container *ngIf="isOwnProfile">
+        <!-- Modo Normal -->
+        <button 
+          *ngIf="!isEditing" 
+          class="btn btn-outline btn-block edit-profile-btn" 
+          (click)="startEditing()"
+        >
+          Editar Perfil
+        </button>
+
+        <!-- Modo Edición -->
+        <div *ngIf="isEditing" class="edit-actions-grid">
+          <button 
+            type="button" 
+            class="btn btn-primary btn-sm" 
+            (click)="saveProfile()" 
+            [disabled]="isSaving || !editForm.name.trim()"
+          >
+            {{ isSaving ? 'Guardando...' : 'Guardar' }}
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-outline btn-sm" 
+            (click)="cancelEditing()" 
+            [disabled]="isSaving"
+          >
+            Cancelar
+          </button>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- COLUMNA DERECHA: Biografía, Propiedades y Reseñas -->
+    <div class="agent-details-column">
+      
+      <!-- Biografía (Modo Normal vs Modo Edición) -->
+      <section class="bio-section">
+        <h2>{{ isEditing ? 'Editar tu descripción' : 'Sobre ' + agent.name }}</h2>
+        
+        <p class="bio-text" *ngIf="!isEditing">{{ agent.bio || 'Este usuario aún no ha agregado una biografía o presentación.' }}</p>
+        
+        <div class="edit-bio-group" *ngIf="isEditing">
+          <label for="edit-bio">Biografía / Presentación</label>
+          <textarea 
+            id="edit-bio" 
+            [(ngModel)]="editForm.bio" 
+            name="bio" 
+            class="input-field textarea edit-bio-textarea"
+            rows="6"
+            placeholder="Escribe algo sobre ti, tu pasión por la arquitectura, tu hospitalidad, etc..."
+          ></textarea>
+        </div>
+      </section>
+
+      <!-- Propiedades del Anfitrión -->
+      <section class="properties-section">
+        <h2>Espacios publicados por {{ agent.name }}</h2>
+        
+        <div class="properties-grid" *ngIf="agentProperties.length > 0">
+          <app-property-card 
+            *ngFor="let prop of agentProperties" 
+            [property]="prop"
+          ></app-property-card>
+        </div>
+
+        <div class="empty-properties" *ngIf="agentProperties.length === 0">
+          <p>Este anfitrión no tiene espacios activos actualmente.</p>
+        </div>
+      </section>
+
+      <!-- Reseñas -->
+      <section class="reviews-section">
+        <h2>Reseñas de Inquilinos</h2>
+        
+        <div class="reviews-list" *ngIf="reviews.length > 0">
+          <div class="review-card" *ngFor="let rev of reviews">
+            <div class="review-header">
+              <div class="author-info">
+                <span class="author-name">{{ rev.author }}</span>
+                <span class="review-date">{{ rev.date }}</span>
+              </div>
+              <div class="review-stars">
+                <span *ngFor="let star of getStars(rev.rating)">★</span>
+              </div>
+            </div>
+            <p class="review-comment">"{{ rev.comment }}"</p>
+          </div>
+        </div>
+
+        <div class="empty-properties" *ngIf="reviews.length === 0">
+          <p>Este anfitrión aún no cuenta con reseñas de huéspedes.</p>
+        </div>
+      </section>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="loading-state" *ngIf="loading">
+  Cargando perfil del anfitrión...
+</div>

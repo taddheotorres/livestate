@@ -1,0 +1,25 @@
+<div class="property-card" *ngIf="property" [routerLink]="['/properties', property.id]">
+  <!-- Imagen real si existe -->
+  <div class="card-image-wrapper" *ngIf="property.images && property.images.length > 0">
+    <img class="card-image" [src]="property.images[0].imageUrl" [alt]="property.title">
+  </div>
+  <!-- Placeholder si no hay imagen -->
+  <div class="card-image-placeholder" *ngIf="!property.images || property.images.length === 0">
+    <span class="placeholder-text">SIN IMAGEN</span>
+  </div>
+
+  <div class="card-content">
+    <div class="card-header">
+      <h3 class="title">{{property.title || '&nbsp;'}}</h3>
+    </div>
+
+    <p class="location" [innerHTML]="property.location || '&amp;nbsp;'"></p>
+
+    <div class="card-details">
+      <span>{{property.bedrooms}} Hab</span> &mdash;
+      <span>{{property.bathrooms}} Baños</span> &mdash;
+      <span>{{property.areaSqm}} m²</span>
+    </div>
+  </div>
+</div>
+

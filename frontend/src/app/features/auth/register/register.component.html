@@ -1,0 +1,113 @@
+<div class="auth-container">
+  <div class="auth-card" [class.auth-card--wide]="!roleSelected">
+
+    <!-- ─── PASO 1: Selección de Rol ─── -->
+    <div class="role-selection" *ngIf="!roleSelected" [class.role-selection--exiting]="selectedRole !== null">
+
+      <div class="auth-header">
+        <a routerLink="/" class="brand">Livestate</a>
+        <h1>Crea tu cuenta</h1>
+        <p>¿Cómo quieres usar Livestate?</p>
+      </div>
+
+      <div class="role-cards">
+
+        <!-- Tarjeta: Soy Inquilino -->
+        <button class="role-card" (click)="selectRole('USER')">
+          <div class="role-icon">🏠</div>
+          <h2 class="role-title">Soy Inquilino</h2>
+          <p class="role-desc">Quiero explorar, comparar y rentar espacios increíbles</p>
+          <span class="role-cta">Empezar a explorar →</span>
+        </button>
+
+        <!-- Tarjeta: Ser Anfitrión -->
+        <button class="role-card role-card--accent" (click)="selectRole('AGENT')">
+          <div class="role-icon">🏡</div>
+          <h2 class="role-title">Ser Anfitrión</h2>
+          <p class="role-desc">Quiero publicar y gestionar mis propiedades en Livestate</p>
+          <span class="role-cta">Publicar espacios →</span>
+        </button>
+
+      </div>
+
+      <div class="auth-footer">
+        <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+      </div>
+    </div>
+
+    <!-- ─── PASO 2: Formulario de Registro ─── -->
+    <div class="register-form-step" *ngIf="roleSelected">
+
+      <div class="auth-header">
+        <a routerLink="/" class="brand">Livestate</a>
+        <div class="role-badge" [class.role-badge--agent]="selectedRole === 'AGENT'">
+          {{ selectedRole === 'AGENT' ? '🏡 Anfitrión' : '🏠 Inquilino' }}
+        </div>
+        <h1>{{ selectedRole === 'AGENT' ? 'Crea tu cuenta de anfitrión' : 'Crea tu cuenta' }}</h1>
+        <p>{{ selectedRole === 'AGENT' ? 'Publica y gestiona tus espacios' : 'Empieza a explorar espacios únicos' }}</p>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" #registerForm="ngForm" class="auth-form">
+        <div class="form-group">
+          <label for="name">Tu nombre</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            [(ngModel)]="user.name"
+            required
+            class="input-field"
+            placeholder="¿Cómo te llamas?"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="email">Correo</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            [(ngModel)]="user.email"
+            required
+            class="input-field"
+            placeholder="tu@correo.com"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            [(ngModel)]="user.password"
+            required
+            minlength="6"
+            class="input-field"
+            placeholder="Mínimo 6 caracteres"
+          >
+        </div>
+
+        <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+        <button
+          type="submit"
+          class="btn btn-primary btn-block"
+          [disabled]="!registerForm.form.valid || isLoading"
+        >
+          {{ isLoading ? 'Creando cuenta...' : 'Crear Cuenta' }}
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+        <p class="change-role-link">
+          <button type="button" class="btn-link" (click)="roleSelected = false; selectedRole = null">
+            ← Cambiar tipo de cuenta
+          </button>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,213 @@
+<div class="detail-container" *ngIf="!loading && property">
+  
+  <div class="content-grid">
+    
+    <!-- Columna Izquierda: Galería, Specs y Descripción -->
+    <div class="main-info">
+      <a routerLink="/catalog" class="back-link">&larr; Volver a la colección</a>
+      
+      <!-- Galería Inmersiva Premium de Fotos al lado izquierdo -->
+      <div class="property-gallery" *ngIf="property.images && property.images.length > 0">
+        <div class="main-image-wrapper">
+          <img [src]="activeImageUrl" [alt]="property.title" class="gallery-main-image">
+        </div>
+        
+        <div class="thumbnails-container" *ngIf="property.images.length > 1">
+          <div 
+            *ngFor="let img of property.images" 
+            class="thumbnail-card"
+            [class.active]="img.imageUrl === activeImageUrl"
+            (click)="setActiveImage(img.imageUrl)"
+          >
+            <img [src]="img.imageUrl" [alt]="property.title" class="thumbnail-img">
+          </div>
+        </div>
+      </div>
+      
+      <div class="specs">
+        <div class="spec-item">
+          <span class="spec-value">{{property.bedrooms}}</span>
+          <span class="spec-label">Habitaciones</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-value">{{property.bathrooms}}</span>
+          <span class="spec-label">Baños</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-value">{{property.areaSqm}}</span>
+          <span class="spec-label">Metros Cuadrados</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-value">{{property.type === 'HOUSE' ? 'Casa' : 'Apartamento'}}</span>
+          <span class="spec-label">Tipo</span>
+        </div>
+      </div>
+
+      <div class="description-section">
+        <h2>Acerca de este espacio</h2>
+        <p class="description">{{property.description}}</p>
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Información Principal y Acciones -->
+    <div class="sidebar">
+      <div class="action-card">
+        <!-- Título y Ubicación subidos aquí -->
+        <div class="property-header-card">
+          <h1 class="title">{{property.title}}</h1>
+          <p class="location">{{property.location}}</p>
+        </div>
+
+        <div class="price-section" *ngIf="property.price">
+          <span class="price-amount">${{property.price | number:'1.0-0'}}</span>
+          <span class="price-period">/ mes</span>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary btn-block" (click)="openBookingDrawer()">Solicitar Renta</button>
+          <button class="btn btn-outline btn-block" (click)="openVisitDrawer()">Programar Visita</button>
+        </div>
+
+        <div class="host-info" [routerLink]="['/agents', property.agent?.id || 1]" style="cursor: pointer;">
+          <div class="host-avatar">{{ (property.agent?.name || 'Nelva Torres').charAt(0) }}</div>
+          <div class="host-details">
+            <p class="host-name">Anfitrión: {{ property.agent?.name || 'Nelva Torres' }}</p>
+            <div class="host-rating-inline" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; color: #E6B044; margin-top: 0.2rem;">
+              <span>★</span>
+              <span style="color: var(--text-primary); font-weight: 500;">{{ property.agent?.rating || '4.9' }}</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">· Recomendado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="loading-state" *ngIf="loading">
+  Cargando detalles del espacio...
+</div>
+
+<!-- ======================= -->
+<!-- DRAWERS (PANEL LATERAL) -->
+<!-- ======================= -->
+
+<!-- Drawer Overlay -->
+<div class="drawer-overlay" *ngIf="activeDrawer !== 'NONE'" (click)="closeDrawer()"></div>
+
+<!-- BOOKING DRAWER -->
+<div class="drawer" [class.open]="activeDrawer === 'BOOKING'">
+  <div class="drawer-header">
+    <h3>Solicitar Renta</h3>
+    <button class="btn-close" (click)="closeDrawer()">✕</button>
+  </div>
+  
+  <div class="drawer-content" *ngIf="!bookingSuccess">
+    <div class="booking-summary">
+      <img [src]="property?.images[0]?.imageUrl" alt="prop" class="summary-img">
+      <div class="summary-info">
+        <h4>{{ property?.title }}</h4>
+        <p>${{ property?.price | number }} / mes</p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="submitBooking()" #bookingForm="ngForm" class="drawer-form">
+      <div class="form-group">
+        <label>Fecha de inicio</label>
+        <input type="date" name="startDate" [(ngModel)]="bookingStartDate" (change)="calculateTotal()" required class="input-field">
+      </div>
+      <div class="form-group">
+        <label>Fecha de fin</label>
+        <input type="date" name="endDate" [(ngModel)]="bookingEndDate" (change)="calculateTotal()" required class="input-field">
+      </div>
+
+      <div class="total-calc" *ngIf="bookingTotalAmount > 0">
+        <span>Total estimado:</span>
+        <span class="total-amount">${{ bookingTotalAmount | number }}</span>
+      </div>
+
+      <div class="form-group">
+        <label>Método de Pago</label>
+        <select name="paymentMethod" [(ngModel)]="bookingPaymentMethod" required class="input-field">
+          <option value="CARD">💳 Tarjeta de Crédito</option>
+          <option value="TRANSFER">🏦 Transferencia Bancaria</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="!bookingForm.valid || bookingTotalAmount <= 0 || bookingLoading">
+        {{ bookingLoading ? 'Procesando...' : 'Confirmar Solicitud' }}
+      </button>
+    </form>
+  </div>
+
+  <div class="drawer-content success-state" *ngIf="bookingSuccess">
+    <div class="success-icon">✓</div>
+    <h3>¡Solicitud Enviada!</h3>
+    <p>El anfitrión revisará tu solicitud de renta pronto.</p>
+    <button class="btn btn-primary btn-block" (click)="closeDrawer()">Cerrar</button>
+  </div>
+</div>
+
+<!-- VISIT DRAWER -->
+<div class="drawer" [class.open]="activeDrawer === 'VISIT'">
+  <div class="drawer-header">
+    <h3>Contactar Anfitrión</h3>
+    <button class="btn-close" (click)="closeDrawer()">✕</button>
+  </div>
+
+  <div class="drawer-tabs">
+    <button class="tab-btn" [class.active]="activeTab === 'INFO'" (click)="activeTab = 'INFO'">Programar Visita</button>
+    <button class="tab-btn" [class.active]="activeTab === 'CHAT'" (click)="openChatTab()">Chat Directo</button>
+  </div>
+
+  <div class="drawer-content" *ngIf="activeTab === 'INFO' && !visitSuccess">
+    <div class="agent-contact-card">
+      <div class="host-avatar large">{{ property?.agent?.name?.charAt(0) }}</div>
+      <h4>{{ property?.agent?.name }}</h4>
+      <p class="agent-email">{{ property?.agent?.email }}</p>
+      <p class="agent-phone" *ngIf="property?.agent?.phone">📞 {{ property?.agent?.phone }}</p>
+      <a [href]="'mailto:' + property?.agent?.email" class="btn btn-outline btn-sm mt-2">Enviar Correo</a>
+    </div>
+
+    <form (ngSubmit)="submitVisit()" #visitForm="ngForm" class="drawer-form mt-4">
+      <h4>Agendar una visita</h4>
+      <div class="form-group">
+        <label>Fecha sugerida</label>
+        <input type="date" name="visitDate" [(ngModel)]="visitDate" required class="input-field">
+      </div>
+      <div class="form-group">
+        <label>Hora sugerida</label>
+        <input type="time" name="visitTime" [(ngModel)]="visitTime" class="input-field">
+      </div>
+      
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="!visitForm.valid || visitLoading">
+        {{ visitLoading ? 'Enviando...' : 'Solicitar Visita' }}
+      </button>
+    </form>
+  </div>
+
+  <div class="drawer-content success-state" *ngIf="activeTab === 'INFO' && visitSuccess">
+    <div class="success-icon">✓</div>
+    <h3>Visita Solicitada</h3>
+    <p>El anfitrión se pondrá en contacto contigo para confirmar.</p>
+    <button class="btn btn-primary btn-block" (click)="closeDrawer()">Cerrar</button>
+  </div>
+
+  <!-- CHAT TAB -->
+  <div class="drawer-content chat-container" *ngIf="activeTab === 'CHAT'">
+    <div class="chat-messages">
+      <div class="message" *ngFor="let msg of messages" [class.sent]="msg.sender?.id !== property?.agent?.id">
+        <p>{{ msg.content }}</p>
+        <span class="msg-time">{{ msg.createdAt | date:'shortTime' }}</span>
+      </div>
+      <div class="empty-chat" *ngIf="messages.length === 0">
+        Inicia la conversación con {{ property?.agent?.name }}
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" [(ngModel)]="chatInput" placeholder="Escribe un mensaje..." class="input-field" (keyup.enter)="sendMessage()">
+      <button class="btn btn-primary" (click)="sendMessage()" [disabled]="!chatInput.trim()">➤</button>
+    </div>
+  </div>
+</div>

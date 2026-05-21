@@ -1,0 +1,54 @@
+<nav class="navbar">
+  <div class="navbar-container">
+
+    <!-- Izquierda: nav links -->
+    <div class="nav-links">
+      <a routerLink="/" class="nav-link">Explorar</a>
+    </div>
+
+    <!-- Centro: Logo -->
+    <div class="logo-container">
+      <a routerLink="/" class="logo">LIVESTATE</a>
+    </div>
+
+    <!-- Derecha: acciones -->
+    <div class="nav-actions">
+
+      <!-- Logueado como AGENT (anfitrión) -->
+      <ng-container *ngIf="isLoggedIn && currentUser?.role === 'AGENT'">
+        <a routerLink="/dashboard" class="nav-link">Dashboard</a>
+        <a *ngIf="currentUser" [routerLink]="['/agents', currentUser.id]" class="nav-link">Mi Perfil Público</a>
+        <a routerLink="/properties/new" class="nav-link nav-link--accent">Publicar</a>
+        <button class="btn btn-outline btn-sm" (click)="logout()">Salir</button>
+      </ng-container>
+
+      <!-- Logueado como USER (inquilino) -->
+      <ng-container *ngIf="isLoggedIn && currentUser?.role === 'USER'">
+        <a routerLink="/dashboard" class="nav-link">Mis Viajes</a>
+        <button class="btn btn-outline btn-sm" (click)="logout()">Salir</button>
+      </ng-container>
+
+      <!-- Logueado pero role aún cargando (fallback) -->
+      <ng-container *ngIf="isLoggedIn && !currentUser">
+        <button class="btn btn-outline btn-sm" (click)="logout()">Salir</button>
+      </ng-container>
+
+      <!-- Sin sesión -->
+      <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/login" class="nav-link">Iniciar Sesión</a>
+        <a routerLink="/register" class="btn btn-outline btn-sm">Registrarse</a>
+      </ng-container>
+
+      <!-- Toggle de tema (siempre visible) -->
+      <button
+        class="btn-theme"
+        [class.btn-theme--moon]="!isDarkMode"
+        (click)="toggleTheme()"
+        [title]="isDarkMode ? 'Modo Claro' : 'Modo Oscuro'"
+      >
+        {{ isDarkMode ? '☀' : '☾' }}
+      </button>
+    </div>
+
+  </div>
+</nav>

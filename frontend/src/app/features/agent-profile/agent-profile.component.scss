@@ -1,0 +1,345 @@
+.profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem 8rem;
+}
+
+.profile-header-bar {
+  margin-bottom: 3rem;
+
+  .back-link {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    transition: color 0.3s;
+
+    &:hover {
+      color: var(--text-primary);
+    }
+  }
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 5rem;
+  align-items: start;
+}
+
+/* COLUMNA IZQUIERDA: Tarjeta del Agente (Sticky) */
+.agent-card {
+  position: sticky;
+  top: 110px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .avatar-wrapper {
+    position: relative;
+    margin-bottom: 2rem;
+
+    .avatar-large {
+      width: 110px;
+      height: 110px;
+      background-color: #E2DFD5;
+      color: var(--text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      font-weight: 300;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .badge-recommended {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--text-primary);
+      color: var(--bg-primary);
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      white-space: nowrap;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .agent-name {
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.01em;
+  }
+
+  .agent-role {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Estrellas */
+  .rating-stars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-bottom: 2.5rem;
+
+    .stars {
+      color: #E6B044;
+      font-size: 1.2rem;
+      letter-spacing: -0.05em;
+    }
+
+    .rating-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-left: 0.25rem;
+    }
+
+    .reviews-count {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+  }
+
+  /* Métricas */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    border-top: 1px solid var(--border-light);
+    padding-top: 2rem;
+    gap: 0.5rem;
+
+    .metric-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+
+      .metric-num {
+        font-size: 1.3rem;
+        font-weight: 400;
+        color: var(--text-primary);
+      }
+
+      .metric-label {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    }
+  }
+}
+
+/* COLUMNA DERECHA */
+.agent-details-column {
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
+
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-primary);
+    margin-bottom: 1.8rem;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 0.75rem;
+  }
+}
+
+/* Biografía */
+.bio-section {
+  .bio-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+}
+
+/* Propiedades del Agente */
+.properties-section {
+  .properties-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+  }
+
+  .empty-properties {
+    padding: 3rem;
+    text-align: center;
+    border: 1px dashed var(--border-light);
+    border-radius: 12px;
+    color: var(--text-muted);
+  }
+}
+
+/* Reseñas */
+.reviews-section {
+  .reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .review-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+
+      .author-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+
+        .author-name {
+          font-size: 0.95rem;
+          font-weight: 500;
+          color: var(--text-primary);
+        }
+
+        .review-date {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+        }
+      }
+
+      .review-stars {
+        color: #E6B044;
+        font-size: 0.9rem;
+        letter-spacing: -0.05em;
+      }
+    }
+
+    .review-comment {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+  }
+}
+
+.loading-state {
+  text-align: center;
+  padding: 5rem;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+/* Edición de Perfil */
+.edit-name-group {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  text-align: left;
+
+  label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+  }
+
+  .edit-name-input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    font-size: 1.1rem;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
+
+.edit-bio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .edit-bio-textarea {
+    width: 100%;
+    resize: vertical;
+    line-height: 1.6;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+}
+
+.edit-profile-btn {
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.edit-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+/* Responsivo */
+@media (max-width: 1024px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 4rem;
+  }
+
+  .agent-card {
+    position: static;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 2rem 1.5rem;
+  }
+
+  .properties-section .properties-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,68 @@
+<div class="home-container">
+
+  <!-- Hero Carousel -->
+  <section class="hero-carousel">
+    <div class="slides-wrapper">
+      <div
+        class="slide"
+        *ngFor="let slide of heroSlides; let i = index"
+        [class.active]="i === currentSlide"
+      >
+        <!-- Imágenes clickeables → navegan a la propiedad -->
+        <div class="slide-images" (click)="goToProperty(slide.propertyId)" style="cursor: pointer;">
+          <img class="slide-bg" [src]="slide.images[0]" [alt]="slide.name" loading="eager">
+          <img class="slide-bg" [src]="slide.images[1]" [alt]="slide.name" loading="eager">
+        </div>
+        <div class="slide-overlay"></div>
+        <div class="slide-content">
+          <span class="slide-tag">{{ slide.tag }}</span>
+          <h1 class="slide-name">{{ slide.name }}</h1>
+          <p class="slide-location">{{ slide.location }}</p>
+          <div class="slide-actions">
+            <button class="btn btn-hero" (click)="goToProperty(slide.propertyId)">
+              Ver este espacio →
+            </button>
+            <a routerLink="/catalog" class="btn btn-hero btn-hero--ghost">
+              Ver catálogo
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controles -->
+    <button class="carousel-btn carousel-btn--prev" (click)="prevSlide()">&#8592;</button>
+    <button class="carousel-btn carousel-btn--next" (click)="nextSlide()">&#8594;</button>
+
+    <!-- Dots -->
+    <div class="carousel-dots">
+      <button
+        class="dot"
+        *ngFor="let slide of heroSlides; let i = index"
+        [class.active]="i === currentSlide"
+        (click)="goToSlide(i)"
+      ></button>
+    </div>
+  </section>
+
+  <!-- Featured Properties Section -->
+  <section class="featured-section">
+    <div class="section-header">
+      <h2>Colección Seleccionada</h2>
+      <a routerLink="/catalog" class="view-all">Ver catálogo completo</a>
+    </div>
+
+    <div class="properties-grid">
+      <app-property-card
+        *ngFor="let prop of featuredProperties"
+        [property]="prop">
+      </app-property-card>
+    </div>
+
+    <div class="empty-state" *ngIf="featuredProperties.length === 0">
+      <p>No hay espacios disponibles por el momento.</p>
+    </div>
+  </section>
+
+</div>
+

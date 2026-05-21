@@ -1,0 +1,165 @@
+@import '../login/login.component.scss';
+
+/* ─── Paso 1: Tarjeta ancha para selección de rol ─── */
+.auth-card--wide {
+  max-width: 760px;
+  width: 100%;
+}
+
+/* ─── Selección de rol: contenedor ─── */
+.role-selection {
+  animation: fadeSlideIn 0.35s ease;
+
+  &--exiting {
+    animation: fadeSlideOut 0.28s ease forwards;
+  }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-10px) scale(0.98); }
+}
+
+/* ─── Tarjetas de rol ─── */
+.role-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.role-card {
+  background: transparent;
+  border: 1.5px solid var(--border-light);
+  border-radius: 12px;
+  padding: 2rem 1.75rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-family: inherit;
+
+  &:hover {
+    border-color: var(--text-primary);
+    background-color: var(--bg-secondary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+
+  /* Variante acento para "Anfitrión" */
+  &--accent {
+    border-color: var(--brand-secondary);
+
+    &:hover {
+      border-color: var(--brand-primary);
+      background-color: rgba(149, 96, 107, 0.05);
+    }
+  }
+
+  .role-icon {
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .role-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-transform: none;
+    letter-spacing: 0;
+    margin: 0;
+  }
+
+  .role-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .role-cta {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+    transition: color 0.2s;
+  }
+
+  &:hover .role-cta {
+    color: var(--text-primary);
+  }
+}
+
+@media (max-width: 600px) {
+  .role-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-card--wide {
+    max-width: 100%;
+  }
+}
+
+/* ─── Paso 2: Animación de entrada del formulario ─── */
+.register-form-step {
+  animation: fadeSlideIn 0.35s ease;
+}
+
+/* ─── Badge de rol seleccionado ─── */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  padding: 0.3rem 0.85rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-light);
+
+  &--agent {
+    background-color: rgba(149, 96, 107, 0.08);
+    color: var(--brand-primary);
+    border-color: var(--brand-secondary);
+  }
+}
+
+/* ─── Enlace para cambiar tipo de cuenta ─── */
+.change-role-link {
+  margin-top: 0.75rem;
+
+  .btn-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 0;
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--text-primary);
+    }
+  }
+}

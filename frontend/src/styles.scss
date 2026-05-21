@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&display=swap');
+
+:root {
+  /* Minimalist Earthy Palette (from user references) */
+  --bg-navbar: #F5F3ED; /* Color crema original intacto para el top bar */
+  --bg-primary: #DBD6C7; /* Color de fondo general significativamente más opaco y terroso */
+  --bg-secondary: #CFCAB7; /* Crema de contraste oscuro */
+  --bg-card: #FAF8F5; /* Crema blanquecino muy cómodo en lugar de blanco puro */
+  
+  --text-primary: #2C303A; /* Dark slate */
+  --text-secondary: #646A81; /* From palette */
+  --text-muted: #837C86; /* From palette */
+  
+  /* Brand Accents */
+  --brand-primary: #95606B; /* Muted rose/brown from palette */
+  --brand-secondary: #B6A49E; /* Lighter taupe */
+  --brand-tertiary: #D8E2DF; /* Soft mint/grey */
+
+  /* Structural */
+  --brand-primary: #95606B; /* Muted rose/brown from palette */
+  --brand-secondary: #B6A49E; /* Lighter taupe */
+  --brand-tertiary: #D8E2DF; /* Soft mint/grey */
+
+  /* Structural */
+  --border-color: #D1D1D5; /* From palette */
+  --border-light: #E5E5E5;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+/* Comfortable Dark Mode based on provided palette */
+[data-theme="dark"] {
+  --bg-navbar: #1C1C1E; /* Color oscuro original intacto para el top bar */
+  --bg-primary: #0A0A0B; /* Negro profundo mate para el cuerpo general */
+  --bg-secondary: #141416; /* Gris oscuro de contraste */
+  --bg-card: #1C1C1E; 
+  
+  --text-primary: #F7F5F0; /* Crema/blanco para máxima legibilidad */
+  --text-secondary: #C0C0C0; /* Gris claro para subtítulos y enlaces */
+  --text-muted: #888888; /* Gris medio para textos secundarios */
+  
+  --brand-primary: #DDC2BC; /* Acento rosa cálido de tu paleta */
+  --brand-secondary: #B6A49E; 
+  
+  --border-color: #444444;
+  --border-light: #333333;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Jost', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--brand-primary);
+}
+
+/* Button Utilities (Minimalist) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  border: 1px solid transparent;
+  font-size: 0.85rem;
+  background: transparent;
+}
+
+.btn-primary {
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--brand-primary);
+  color: white;
+}
+
+.btn-outline {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+/* Base Inputs */
+.input-field {
+  width: 100%;
+  padding: 0.75rem 0;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: border-color var(--transition-fast);
+  font-size: 0.95rem;
+
+  &::placeholder {
+    color: var(--text-muted);
+    opacity: 0.8;
+  }
+}
+
+.input-field:focus {
+  outline: none;
+  border-bottom-color: var(--text-primary);
+}
+
+/* Small button variant */
+.btn-sm {
+  padding: 0.35rem 1rem;
+  font-size: 0.8rem;
+}
+
+/* Theme toggle button (Premium circular contrast button) */
+.btn-theme {
+  background-color: #1C1C1E; /* Negro del modo noche */
+  color: #F5F3ED; /* Crema del modo día */
+  border: 1px solid #1C1C1E;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  &:hover {
+    transform: scale(1.08);
+  }
+
+  /* Ajuste de balance visual para el glifo asimétrico de la luna ☾ */
+  &.btn-theme--moon {
+    padding-left: 3px;
+    padding-bottom: 1px;
+  }
+}
+
+/* En modo noche, se invierten los colores */
+[data-theme="dark"] .btn-theme {
+  background-color: #F5F3ED; /* Crema del modo día */
+  color: #1C1C1E; /* Negro del modo noche */
+  border-color: #F5F3ED;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+/* Nav link accent */
+.nav-link--accent {
+  color: var(--brand-primary) !important;
+  font-weight: 500;
+}
+
+/* ─── Dark Mode: browser defaults override ─── */
+[data-theme="dark"] {
+  select.input-field,
+  select {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border-bottom-color: var(--border-color);
+  }
+
+  option {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  .property-form,
+  .auth-card,
+  .action-card {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-light) !important;
+  }
+
+  h1, h2, h3, h4 {
+    color: var(--text-primary);
+  }
+
+  label {
+    color: var(--text-muted);
+  }
+}

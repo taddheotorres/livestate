@@ -1,0 +1,236 @@
+<div class="form-page-container">
+  
+  <div class="form-header-bar">
+    <a routerLink="/" class="back-link">&larr; Volver a la colección</a>
+    <h1 class="page-title">Publicar un Nuevo Espacio</h1>
+    <p class="page-subtitle">Rellena los datos a la derecha para ver la previsualización en vivo de tu diseño minimalista.</p>
+  </div>
+
+  <div class="two-columns-layout">
+    
+    <!-- COLUMNA IZQUIERDA: Previsualización en Vivo de la Propiedad -->
+    <div class="preview-column">
+      <div class="preview-badge">Vista Previa en Vivo</div>
+      
+      <div class="property-detail-preview">
+        <!-- Cabecera y Precio Principal (como en la tarjeta de detalles lateral) -->
+        <div class="preview-header-card">
+          <div class="header-main">
+            <h1 class="title">{{ property.title || 'Título del Espacio' }}</h1>
+            <p class="location">{{ property.location || 'La Paz, BCS' }}</p>
+          </div>
+          <div class="price-section" *ngIf="property.price">
+            <span class="price-amount">${{ property.price | number:'1.0-0' }}</span>
+            <span class="price-period">/ mes</span>
+          </div>
+        </div>
+
+        <!-- Galería Inmersiva en Vivo -->
+        <div class="property-gallery" *ngIf="uploadedImages.length > 0">
+          <div class="main-image-wrapper">
+            <img [src]="uploadedImages[activePreviewImageIndex]?.imageUrl" [alt]="property.title || 'Espacio'" class="gallery-main-image">
+          </div>
+          
+          <div class="thumbnails-container" *ngIf="uploadedImages.length > 1">
+            <div 
+              *ngFor="let img of uploadedImages; let i = index" 
+              class="thumbnail-card"
+              [class.active]="i === activePreviewImageIndex"
+              (click)="setActivePreview(i)"
+            >
+              <img [src]="img.imageUrl" [alt]="property.title" class="thumbnail-img">
+            </div>
+          </div>
+        </div>
+
+        <!-- Placeholder elegante si no hay fotos cargadas -->
+        <div class="empty-gallery-placeholder" *ngIf="uploadedImages.length === 0">
+          <div class="placeholder-icon">📷</div>
+          <p class="placeholder-text">Carga imágenes o selecciona un preset para activar la galería interactiva</p>
+        </div>
+
+        <!-- Especificaciones Estructurales -->
+        <div class="specs">
+          <div class="spec-item">
+            <span class="spec-value">{{property.bedrooms || '—'}}</span>
+            <span class="spec-label">Habitaciones</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-value">{{property.bathrooms || '—'}}</span>
+            <span class="spec-label">Baños</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-value">{{property.areaSqm || '—'}}</span>
+            <span class="spec-label">Metros²</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-value">{{property.type === 'HOUSE' ? 'Casa' : 'Apartamento'}}</span>
+            <span class="spec-label">Tipo</span>
+          </div>
+        </div>
+
+        <!-- Acerca del Espacio -->
+        <div class="description-section">
+          <h2>Acerca de este espacio</h2>
+          <p class="description">{{property.description || 'Describe aquí la luz, los materiales, la orientación y la esencia del espacio arquitectónico...'}}</p>
+        </div>
+
+        <!-- Ficha de Anfitrión Integrada -->
+        <div class="host-info-card">
+          <div class="host-avatar">{{ (currentUser?.name || 'Nelva Torres').charAt(0) }}</div>
+          <div class="host-details">
+            <p class="host-name">Anfitrión: {{ currentUser?.name || 'Nelva Torres' }}</p>
+            <div class="host-rating-inline">
+              <span>★</span>
+              <span class="rating-value">{{ currentUser?.rating || '4.9' }}</span>
+              <span class="recommended-badge">· Recomendado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: Formulario de Registro e Imágenes -->
+    <div class="form-column">
+      <form (ngSubmit)="onSubmit()" #propertyForm="ngForm" class="property-form">
+        
+        <div class="form-header-card">
+          <h2 class="form-title">Detalles del Espacio</h2>
+          <p class="form-desc">Ingresa las características y detalles estructurales de la propiedad.</p>
+        </div>
+
+        <!-- Fila Título y Precio -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="title">Título del Espacio</label>
+            <input type="text" id="title" name="title" [(ngModel)]="property.title" required class="input-field" placeholder="Ej: Casa Palms">
+          </div>
+          <div class="form-group">
+            <label for="price">Precio por mes (USD)</label>
+            <input type="number" id="price" name="price" [(ngModel)]="property.price" required class="input-field" placeholder="Ej: 1200">
+          </div>
+        </div>
+
+        <!-- Fila Ubicación y Tipo -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="location">Ubicación</label>
+            <input type="text" id="location" name="location" [(ngModel)]="property.location" required class="input-field" placeholder="Ciudad, País">
+          </div>
+          <div class="form-group">
+            <label for="type">Tipo de Espacio</label>
+            <select id="type" name="type" [(ngModel)]="property.type" class="input-field">
+              <option value="HOUSE">Casa</option>
+              <option value="APARTMENT">Apartamento</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fila Habitaciones, Baños y Metros -->
+        <div class="form-row three-cols">
+          <div class="form-group">
+            <label for="bedrooms">Habitaciones</label>
+            <input type="number" id="bedrooms" name="bedrooms" [(ngModel)]="property.bedrooms" required class="input-field" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label for="bathrooms">Baños</label>
+            <input type="number" id="bathrooms" name="bathrooms" [(ngModel)]="property.bathrooms" required class="input-field" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label for="area">Metros²</label>
+            <input type="number" id="area" name="areaSqm" [(ngModel)]="property.areaSqm" required class="input-field" placeholder="0">
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="form-group">
+          <label for="description">Descripción del Espacio</label>
+          <textarea id="description" name="description" [(ngModel)]="property.description" required class="input-field textarea" rows="4" placeholder="Ej: Hermosa residencia de diseño orgánico..."></textarea>
+        </div>
+
+        <!-- SECCIÓN DE IMÁGENES -->
+        <div class="form-divider">Imágenes de la Galería</div>
+
+        <!-- Presets rápidos -->
+        <div class="preset-section">
+          <label class="section-label">Poblar rápido con fotos de ejemplo:</label>
+          <div class="preset-buttons">
+            <button 
+              type="button" 
+              *ngFor="let preset of photoPresets" 
+              class="btn-preset"
+              (click)="loadPreset(preset.images)"
+            >
+              {{ preset.name }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Zona Drag & Drop -->
+        <div 
+          class="drag-drop-zone"
+          [class.dragging]="isDragging"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        >
+          <div class="upload-icon">📥</div>
+          <p class="drag-text">Arrastra y suelta fotos aquí o</p>
+          <label for="file-upload" class="file-label">Explorar archivos</label>
+          <input 
+            type="file" 
+            id="file-upload" 
+            multiple 
+            accept="image/*" 
+            (change)="onFileSelected($event)" 
+            class="hidden-file-input"
+          >
+          <p class="file-info">Soporta JPG, PNG, WEBP (se convertirán a Base64)</p>
+        </div>
+
+        <!-- Agregar por URL directa -->
+        <div class="url-input-group">
+          <input 
+            type="text" 
+            [(ngModel)]="imageUrlInput" 
+            name="imageUrlInput" 
+            class="input-field url-field" 
+            placeholder="Pegar URL directa de imagen (ej: https://... o images/...)"
+          >
+          <button type="button" class="btn btn-outline" (click)="addImageUrl()">Añadir URL</button>
+        </div>
+
+        <!-- Fotos agregadas / cola de carga -->
+        <div class="images-queue" *ngIf="uploadedImages.length > 0">
+          <label class="section-label">Cola de imágenes ({{uploadedImages.length}}):</label>
+          <div class="queue-list">
+            <div *ngFor="let img of uploadedImages; let i = index" class="queue-item">
+              <img [src]="img.imageUrl" class="queue-thumb">
+              <div class="queue-actions">
+                <span class="badge badge-primary" *ngIf="img.isPrimary">Portada Principal</span>
+                <button 
+                  type="button" 
+                  *ngIf="!img.isPrimary" 
+                  class="btn-make-primary" 
+                  (click)="setPrimary(i)"
+                >
+                  Hacer Portada
+                </button>
+                <button type="button" class="btn-remove-image" (click)="removeImage(i)">&times;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones del formulario -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-block btn-large" [disabled]="!propertyForm.form.valid || uploadedImages.length === 0 || isSubmitting">
+            {{ isSubmitting ? 'Publicando Espacio...' : 'Publicar Espacio' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

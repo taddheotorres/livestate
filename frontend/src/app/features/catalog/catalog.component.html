@@ -1,0 +1,110 @@
+<div class="catalog-container">
+
+  <!-- Encabezado -->
+  <div class="catalog-header">
+    <div class="header-content">
+      <a routerLink="/" class="back-link">← Volver al inicio</a>
+      <h1>Catálogo de Espacios</h1>
+      <p class="catalog-subtitle">Explora nuestra colección completa de espacios arquitectónicos en La Paz, BCS</p>
+    </div>
+  </div>
+
+  <!-- Barra de Filtros -->
+  <div class="filters-bar">
+    <div class="filters-inner">
+
+      <!-- Tipo -->
+      <div class="filter-group">
+        <label class="filter-label">Tipo</label>
+        <div class="filter-pills">
+          <button
+            class="pill"
+            [class.active]="filters.type === ''"
+            (click)="filters.type = ''; applyFilters()"
+          >Todos</button>
+          <button
+            class="pill"
+            [class.active]="filters.type === 'HOUSE'"
+            (click)="filters.type = 'HOUSE'; applyFilters()"
+          >🏠 Casa</button>
+          <button
+            class="pill"
+            [class.active]="filters.type === 'APARTMENT'"
+            (click)="filters.type = 'APARTMENT'; applyFilters()"
+          >🏢 Apartamento</button>
+        </div>
+      </div>
+
+      <!-- Precio -->
+      <div class="filter-group">
+        <label class="filter-label">Precio / mes</label>
+        <div class="filter-range">
+          <input
+            type="number"
+            class="range-input"
+            placeholder="Mín $"
+            [(ngModel)]="filters.minPrice"
+            (ngModelChange)="applyFilters()"
+          >
+          <span class="range-sep">—</span>
+          <input
+            type="number"
+            class="range-input"
+            placeholder="Máx $"
+            [(ngModel)]="filters.maxPrice"
+            (ngModelChange)="applyFilters()"
+          >
+        </div>
+      </div>
+
+      <!-- Habitaciones -->
+      <div class="filter-group">
+        <label class="filter-label">Hab. mínimas</label>
+        <div class="filter-pills">
+          <button class="pill" [class.active]="!filters.minBedrooms" (click)="filters.minBedrooms = null; applyFilters()">Cualquiera</button>
+          <button class="pill" [class.active]="filters.minBedrooms === 2" (click)="filters.minBedrooms = 2; applyFilters()">2+</button>
+          <button class="pill" [class.active]="filters.minBedrooms === 4" (click)="filters.minBedrooms = 4; applyFilters()">4+</button>
+          <button class="pill" [class.active]="filters.minBedrooms === 6" (click)="filters.minBedrooms = 6; applyFilters()">6+</button>
+        </div>
+      </div>
+
+      <!-- Limpiar filtros -->
+      <button class="clear-btn" *ngIf="hasActiveFilters" (click)="resetFilters()">
+        ✕ Limpiar filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Contador de resultados -->
+  <div class="results-bar" *ngIf="!loading">
+    <span class="results-count">
+      {{ filteredProperties.length }} espacio{{ filteredProperties.length !== 1 ? 's' : '' }}
+      <span *ngIf="hasActiveFilters" class="results-filtered"> encontrados con los filtros aplicados</span>
+    </span>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="loading-dots">
+      <span></span><span></span><span></span>
+    </div>
+    <p>Cargando espacios...</p>
+  </div>
+
+  <!-- Grid de propiedades -->
+  <div class="properties-grid" *ngIf="!loading && filteredProperties.length > 0">
+    <app-property-card
+      *ngFor="let prop of filteredProperties"
+      [property]="prop">
+    </app-property-card>
+  </div>
+
+  <!-- Estado vacío -->
+  <div class="empty-state" *ngIf="!loading && filteredProperties.length === 0">
+    <div class="empty-icon">🔍</div>
+    <h3>Sin resultados</h3>
+    <p>No encontramos espacios con los filtros seleccionados.</p>
+    <button class="btn btn-outline" (click)="resetFilters()">Limpiar filtros</button>
+  </div>
+
+</div>
