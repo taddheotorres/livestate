@@ -17,7 +17,7 @@
       <!-- Logueado como AGENT (anfitrión) -->
       <ng-container *ngIf="isLoggedIn && currentUser?.role === 'AGENT'">
         <a routerLink="/dashboard" class="nav-link">Dashboard</a>
-        <a *ngIf="currentUser" [routerLink]="['/agents', currentUser.id]" class="nav-link">Mi Perfil Público</a>
+        <a *ngIf="currentUser" [routerLink]="['/agents', currentUser.id]" class="nav-link">Mi Perfil</a>
         <a routerLink="/properties/new" class="nav-link nav-link--accent">Publicar</a>
         <button class="btn btn-outline btn-sm" (click)="logout()">Salir</button>
       </ng-container>
@@ -35,7 +35,7 @@
 
       <!-- Sin sesión -->
       <ng-container *ngIf="!isLoggedIn">
-        <a routerLink="/login" class="nav-link">Iniciar Sesión</a>
+        <a routerLink="/login" class="nav-link">Entrar</a>
         <a routerLink="/register" class="btn btn-outline btn-sm">Registrarse</a>
       </ng-container>
 

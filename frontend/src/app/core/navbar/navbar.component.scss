@@ -13,6 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
   gap: 1rem;
 }
 
@@ -41,10 +42,15 @@
 
 /* ─── Centro: Logo ─── */
 .logo-container {
-  flex: 0 0 auto;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
+  background: var(--bg-navbar);
+  padding: 0 1rem;
+  z-index: 10;
 }
 
 .logo {
@@ -64,7 +70,7 @@
   justify-content: flex-end;
   align-items: center;
   gap: 1.5rem;
-  min-width: 0;
+  flex-wrap: wrap;
 
   .nav-link {
     color: var(--text-secondary);
