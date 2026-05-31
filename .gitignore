@@ -34,6 +34,15 @@ target/
 *.tar.gz
 *.rar
 
+# AI Assistant Files
+.junie/
+.copilot/
+.roo/
+
+# Temp files
+backend/cp.txt
+backend/dependency_tree.txt
+
 # OS Generated Files
 .DS_Store
 .DS_Store?
