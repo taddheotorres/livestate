@@ -7,12 +7,14 @@ import com.realestate.api.model.Role;
 import com.realestate.api.model.User;
 import com.realestate.api.repository.UserRepository;
 import com.realestate.api.security.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -41,6 +43,7 @@ public class AuthService {
 
         userRepository.save(user);
 
+        log.info("User registered: {}", request.getEmail());
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
@@ -60,6 +63,7 @@ public class AuthService {
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        log.info("User logged in: {}", request.getEmail());
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)

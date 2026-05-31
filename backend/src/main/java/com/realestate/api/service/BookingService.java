@@ -6,6 +6,7 @@ import com.realestate.api.model.Property;
 import com.realestate.api.model.User;
 import com.realestate.api.repository.BookingRepository;
 import com.realestate.api.repository.PropertyRepository;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -38,6 +40,7 @@ public class BookingService {
                 .notes(notes)
                 .build();
 
+        log.info("Booking created: property={}, tenant={}, amount={}", propertyId, tenant.getId(), totalAmount);
         return bookingRepository.save(booking);
     }
 
@@ -54,6 +57,7 @@ public class BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found: " + bookingId));
         booking.setStatus(Booking.BookingStatus.valueOf(status));
+        log.info("Booking {} status updated to {}", bookingId, status);
         return bookingRepository.save(booking);
     }
 }

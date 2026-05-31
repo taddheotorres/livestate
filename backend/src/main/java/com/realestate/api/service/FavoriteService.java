@@ -6,6 +6,7 @@ import com.realestate.api.model.Property;
 import com.realestate.api.model.User;
 import com.realestate.api.repository.FavoriteRepository;
 import com.realestate.api.repository.PropertyRepository;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FavoriteService {
@@ -47,6 +49,7 @@ public class FavoriteService {
                     .property(property)
                     .build();
             favoriteRepository.save(newFavorite);
+            log.info("Favorite added: user={}, property={}", user.getId(), propertyId);
             return true;
         }
     }

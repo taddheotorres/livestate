@@ -5,6 +5,7 @@ import com.realestate.api.model.Message;
 import com.realestate.api.model.User;
 import com.realestate.api.repository.MessageRepository;
 import com.realestate.api.repository.PropertyRepository;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MessageService {
@@ -33,6 +35,7 @@ public class MessageService {
         }
 
         Message savedMsg = messageRepository.save(msg);
+        log.info("Message sent: from={} to={}", sender.getId(), receiver.getId());
 
         messagingTemplate.convertAndSendToUser(
                 receiver.getId().toString(),

@@ -3,10 +3,12 @@ package com.realestate.api.service;
 import com.realestate.api.exception.ResourceNotFoundException;
 import com.realestate.api.model.User;
 import com.realestate.api.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {

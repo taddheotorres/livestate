@@ -6,6 +6,7 @@ import com.realestate.api.model.User;
 import com.realestate.api.model.Visit;
 import com.realestate.api.repository.PropertyRepository;
 import com.realestate.api.repository.VisitRepository;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VisitService {
@@ -38,6 +40,7 @@ public class VisitService {
                 .notes(notes)
                 .build();
 
+        log.info("Visit scheduled: property={}, visitor={}, date={}", propertyId, visitor.getId(), scheduledDate);
         return visitRepository.save(visit);
     }
 
@@ -54,6 +57,7 @@ public class VisitService {
         Visit visit = visitRepository.findById(visitId)
                 .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + visitId));
         visit.setStatus(Visit.VisitStatus.valueOf(status));
+        log.info("Visit {} status updated to {}", visitId, status);
         return visitRepository.save(visit);
     }
 }

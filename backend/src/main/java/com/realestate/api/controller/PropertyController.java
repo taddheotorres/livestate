@@ -3,6 +3,7 @@ package com.realestate.api.controller;
 import com.realestate.api.dto.mapper.PropertyMapper;
 import com.realestate.api.dto.request.PropertyRequest;
 import com.realestate.api.dto.response.PropertyResponse;
+import com.realestate.api.exception.ResourceNotFoundException;
 import com.realestate.api.model.User;
 import com.realestate.api.service.PropertyService;
 import com.realestate.api.security.SecurityUtils;
@@ -59,7 +60,7 @@ public class PropertyController {
         String userEmail = SecurityUtils.getCurrentUserEmail();
 
         var existing = propertyService.getPropertyById(id)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Property not found: " + id));
 
         if (!existing.getAgent().getEmail().equals(userEmail)) {
             return ResponseEntity.status(403).build();
@@ -74,7 +75,7 @@ public class PropertyController {
         String userEmail = SecurityUtils.getCurrentUserEmail();
 
         var existing = propertyService.getPropertyById(id)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Property not found: " + id));
 
         if (!existing.getAgent().getEmail().equals(userEmail)) {
             return ResponseEntity.status(403).build();
