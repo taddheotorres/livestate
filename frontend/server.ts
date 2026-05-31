@@ -3,6 +3,7 @@ import { CommonEngine } from '@angular/ssr';
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
+import http from 'node:http';
 import bootstrap from './src/main.server';
 
 // The Express app is exported so that it can be used by serverless Functions.
@@ -17,8 +18,21 @@ export function app(): express.Express {
   server.set('view engine', 'html');
   server.set('views', browserDistFolder);
 
-  // Example Express Rest API endpoints
-  // server.get('/api/**', (req, res) => { });
+  // Proxy API requests to backend
+  const apiTarget = process.env['API_PROXY_TARGET'] || 'http://localhost:8081';
+  server.use('/api', (req, res) => {
+    const targetUrl = `${apiTarget}${req.url}`;
+    const proxyReq = http.request(targetUrl, {
+      method: req.method,
+      headers: { ...req.headers, host: new URL(apiTarget).host },
+    }, (proxyRes) => {
+      res.writeHead(proxyRes.statusCode!, proxyRes.headers);
+      proxyRes.pipe(res);
+    });
+    req.pipe(proxyReq);
+    proxyReq.on('error', () => res.status(502).send('Proxy Error'));
+  });
+
   // Serve static files from /browser
   server.get('*.*', express.static(browserDistFolder, {
     maxAge: '1y'

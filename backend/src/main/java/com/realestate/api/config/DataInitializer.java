@@ -4,6 +4,7 @@ import com.realestate.api.model.*;
 import com.realestate.api.repository.PropertyRepository;
 import com.realestate.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
@@ -23,7 +25,7 @@ public class DataInitializer implements CommandLineRunner {
         public void run(String... args) throws Exception {
                 // Solo ejecutar seeding si la BD no tiene propiedades aún
                 if (propertyRepository.count() > 0) {
-                        System.out.println(">> BD ya inicializada, omitiendo seeding.");
+                        log.info("BD ya inicializada, omitiendo seeding.");
                         return;
                 }
 
@@ -134,7 +136,6 @@ public class DataInitializer implements CommandLineRunner {
 
                 propertyRepository.save(casaChulaVista);
 
-                System.out.println(
-                                ">> BD inicializada con propiedades de ejemplo (Nelva Torres - nelva@livestate.com).");
+                log.info("BD inicializada con propiedades de ejemplo (Nelva Torres - nelva@livestate.com).");
         }
 }

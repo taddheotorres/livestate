@@ -1,5 +1,5 @@
 import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiService } from '../services/api.service';
 import { Observable, tap, BehaviorSubject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -7,13 +7,12 @@ import { isPlatformBrowser } from '@angular/common';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8081/api/auth';
   private loggedIn = new BehaviorSubject<boolean>(this.hasToken());
   
   isLoggedIn$ = this.loggedIn.asObservable();
 
   constructor(
-    private http: HttpClient,
+    private api: ApiService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -25,7 +24,7 @@ export class AuthService {
   }
 
   register(user: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, user).pipe(
+    return this.api.post('/auth/register', user).pipe(
       tap((res: any) => {
         if (isPlatformBrowser(this.platformId) && res.token) {
           localStorage.setItem('token', res.token);
@@ -36,7 +35,7 @@ export class AuthService {
   }
 
   login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
+    return this.api.post('/auth/login', credentials).pipe(
       tap((res: any) => {
         if (isPlatformBrowser(this.platformId) && res.token) {
           localStorage.setItem('token', res.token);

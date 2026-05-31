@@ -7,7 +7,10 @@ import { AuthService } from '../../core/auth/auth.service';
 import { BookingService } from '../../core/services/booking.service';
 import { VisitService } from '../../core/services/visit.service';
 import { MessageService } from '../../core/services/message.service';
+import { ToastService } from '../../core/services/toast.service';
 import { Subscription } from 'rxjs';
+import { Property, PropertyImage } from '../../core/models/property.model';
+import { Message } from '../../core/models/message.model';
 
 @Component({
   selector: 'app-property-detail',
@@ -17,7 +20,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './property-detail.component.scss'
 })
 export class PropertyDetailComponent implements OnInit, OnDestroy {
-  property: any;
+  property: Property | null = null;
   loading = true;
   activeImageUrl = '';
 
@@ -41,7 +44,7 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
   activeTab: 'INFO' | 'CHAT' = 'INFO'; // Tabs in Visit drawer
 
   // Chat State
-  messages: any[] = [];
+  messages: Message[] = [];
   chatInput = '';
   private wsSubscription?: Subscription;
   @ViewChild('chatScroll') private chatScrollContainer?: ElementRef;
@@ -54,6 +57,7 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
     private visitService: VisitService,
     private messageService: MessageService,
     private router: Router,
+    private toastService: ToastService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isLoggedIn = !!this.authService.getToken();
@@ -80,7 +84,7 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
     // Comprobar si venimos de un pago exitoso
     this.route.queryParams.subscribe(params => {
       if (params['payment'] === 'cancelled') {
-        alert('El pago fue cancelado. Puedes intentarlo de nuevo.');
+        this.toastService.show('El pago fue cancelado. Puedes intentarlo de nuevo.', 'warning');
       }
     });
   }
@@ -147,13 +151,14 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
     }
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    // Asumimos price es mensual, calculamos por día para ser justos
-    const dailyRate = this.property.price / 30;
+    const price = this.property?.price;
+    if (!price) { this.bookingTotalAmount = 0; return; }
+    const dailyRate = price / 30;
     this.bookingTotalAmount = Math.round(diffDays * dailyRate);
   }
 
   submitBooking() {
-    if (!this.bookingStartDate || !this.bookingEndDate || this.bookingTotalAmount <= 0) return;
+    if (!this.bookingStartDate || !this.bookingEndDate || this.bookingTotalAmount <= 0 || !this.property) return;
     this.bookingLoading = true;
     this.bookingService.createBooking({
       propertyId: this.property.id,
@@ -189,12 +194,12 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
 
   // --- Visit ---
   submitVisit() {
-    if (!this.visitDate) return;
+    if (!this.visitDate || !this.property) return;
     this.visitLoading = true;
     this.visitService.scheduleVisit({
       propertyId: this.property.id,
       scheduledDate: this.visitDate,
-      scheduledTime: this.visitTime ? this.visitTime : undefined
+      scheduledTime: this.visitTime || undefined
     }).subscribe({
       next: () => {
         this.visitLoading = false;
@@ -215,12 +220,12 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
   }
 
   loadMessages() {
-    if (!this.property?.agent?.id) return;
-    this.messageService.getConversation(this.property.agent.id).subscribe({
+    const agentId = this.property?.agent?.id;
+    if (!agentId) return;
+    this.messageService.getConversation(agentId).subscribe({
       next: (data) => {
         this.messages = data;
-        // Mark as read
-        this.messageService.markAsRead(this.property.agent.id).subscribe();
+        this.messageService.markAsRead(agentId).subscribe();
       },
       error: (err) => console.error(err)
     });
@@ -239,6 +244,46 @@ export class PropertyDetailComponent implements OnInit, OnDestroy {
       },
       error: (err) => console.error(err)
     });
+  }
+
+  get primaryImageUrl(): string {
+    return this.property?.images?.[0]?.imageUrl ?? '';
+  }
+
+  isOwnMessage(msg: Message): boolean {
+    return msg.sender.id !== this.property?.agent?.id;
+  }
+
+  get hasImages(): boolean {
+    return !!this.property?.images?.length;
+  }
+
+  get hasMultipleImages(): boolean {
+    return (this.property?.images?.length ?? 0) > 1;
+  }
+
+  get propertyImages(): PropertyImage[] {
+    return this.property?.images ?? [];
+  }
+
+  get hostName(): string {
+    return this.property?.agent?.name || 'Nelva Torres';
+  }
+
+  get hostRating(): number {
+    return this.property?.agent?.rating || 4.9;
+  }
+
+  get hostId(): number {
+    return this.property?.agent?.id || 1;
+  }
+
+  get hostEmail(): string {
+    return this.property?.agent?.email || '';
+  }
+
+  get hostPhone(): string | undefined {
+    return this.property?.agent?.phone;
   }
 
   startChatWebSocket() {

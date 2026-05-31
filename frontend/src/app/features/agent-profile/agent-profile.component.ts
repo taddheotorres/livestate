@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { PropertyService } from '../../core/services/property.service';
+import { ToastService } from '../../core/services/toast.service';
 import { PropertyCardComponent } from '../../shared/components/property-card/property-card.component';
 
 @Component({
@@ -51,7 +52,8 @@ export class AgentProfileComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private propertyService: PropertyService
+    private propertyService: PropertyService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -141,7 +143,7 @@ export class AgentProfileComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al actualizar el perfil:', err);
-        alert('Hubo un error al guardar los cambios del perfil.');
+        this.toastService.show('Hubo un error al guardar los cambios del perfil.', 'error');
         this.isSaving = false;
       }
     });

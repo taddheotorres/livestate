@@ -1,48 +1,49 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
+import { Property, PropertyRequest } from '../models/property.model';
+import { User } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PropertyService {
-  private apiUrl = 'http://localhost:8081/api/properties';
 
-  constructor(private http: HttpClient) { }
+  constructor(private api: ApiService) { }
 
-  getAllProperties(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+  getAllProperties(): Observable<Property[]> {
+    return this.api.get<Property[]>('/properties');
   }
 
-  getPropertyById(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  getPropertyById(id: number): Observable<Property> {
+    return this.api.get<Property>(`/properties/${id}`);
   }
 
-  createProperty(property: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, property);
+  createProperty(property: PropertyRequest): Observable<Property> {
+    return this.api.post<Property>('/properties', property);
   }
 
-  updateProperty(id: number, property: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, property);
+  updateProperty(id: number, property: PropertyRequest): Observable<Property> {
+    return this.api.put<Property>(`/properties/${id}`, property);
   }
 
   deleteProperty(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.api.delete<void>(`/properties/${id}`);
   }
 
-  getMyProperties(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/my`);
+  getMyProperties(): Observable<Property[]> {
+    return this.api.get<Property[]>('/properties/my');
   }
 
-  getAgentById(id: number): Observable<any> {
-    return this.http.get<any>(`http://localhost:8081/api/users/${id}`);
+  getAgentById(id: number): Observable<User> {
+    return this.api.get<User>(`/users/${id}`);
   }
 
-  getCurrentUser(): Observable<any> {
-    return this.http.get<any>('http://localhost:8081/api/users/me');
+  getCurrentUser(): Observable<User> {
+    return this.api.get<User>('/users/me');
   }
 
-  updateCurrentUser(user: any): Observable<any> {
-    return this.http.put<any>('http://localhost:8081/api/users/me', user);
+  updateCurrentUser(user: Partial<User>): Observable<User> {
+    return this.api.put<User>('/users/me', user);
   }
 }

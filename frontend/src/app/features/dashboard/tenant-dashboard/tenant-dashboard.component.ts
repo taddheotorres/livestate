@@ -4,6 +4,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
 import { VisitService } from '../../../core/services/visit.service';
 import { FavoriteService } from '../../../core/services/favorite.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { PropertyCardComponent } from '../../../shared/components/property-card/property-card.component';
 
 @Component({
@@ -197,13 +198,14 @@ export class TenantDashboardComponent implements OnInit {
     private bookingService: BookingService,
     private visitService: VisitService,
     private favoriteService: FavoriteService,
+    private toastService: ToastService,
     private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['payment'] === 'success') {
-        alert('¡Pago completado con éxito! Tu reserva está procesándose.');
+        this.toastService.show('¡Pago completado con éxito! Tu reserva está procesándose.', 'success');
       }
     });
     this.favoriteService.getMyFavorites().subscribe({

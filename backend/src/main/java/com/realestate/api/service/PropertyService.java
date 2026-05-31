@@ -22,6 +22,10 @@ public class PropertyService {
         return propertyRepository.findById(id);
     }
 
+    public List<Property> getPropertiesByAgentId(Long agentId) {
+        return propertyRepository.findByAgentId(agentId);
+    }
+
     public Property createProperty(Property property) {
         if (property.getImages() != null) {
             property.getImages().forEach(image -> image.setProperty(property));

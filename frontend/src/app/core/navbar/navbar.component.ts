@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { PropertyService } from '../services/property.service';
+import { User } from '../models/user.model';
 
 @Component({
   selector: 'app-navbar',
@@ -11,10 +13,11 @@ import { PropertyService } from '../services/property.service';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   isDarkMode = false;
   isLoggedIn = false;
-  currentUser: any = null;
+  currentUser: User | null = null;
+  private subs: Subscription[] = [];
 
   constructor(
     private authService: AuthService,
@@ -23,26 +26,29 @@ export class NavbarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.authService.isLoggedIn$.subscribe(state => {
-      this.isLoggedIn = state;
-      if (state) {
-        this.loadCurrentUser();
-      } else {
-        this.currentUser = null;
-      }
-    });
+    this.subs.push(
+      this.authService.isLoggedIn$.subscribe(state => {
+        this.isLoggedIn = state;
+        if (state) {
+          this.subs.push(
+            this.propertyService.getCurrentUser().subscribe({
+              next: (user) => {
+                this.currentUser = user;
+              },
+              error: () => {
+                console.warn('No se pudo obtener el usuario actual.');
+              }
+            })
+          );
+        } else {
+          this.currentUser = null;
+        }
+      })
+    );
   }
 
-  loadCurrentUser() {
-    this.propertyService.getCurrentUser().subscribe({
-      next: (user) => {
-        this.currentUser = user;
-      },
-      error: (err) => {
-        // Silenciar error si el token expiró o es inválido en la carga inicial
-        console.warn('No se pudo obtener el usuario actual.');
-      }
-    });
+  ngOnDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   toggleTheme() {

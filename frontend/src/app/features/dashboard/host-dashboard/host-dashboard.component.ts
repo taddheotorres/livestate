@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
 import { VisitService } from '../../../core/services/visit.service';
 import { PropertyService } from '../../../core/services/property.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-host-dashboard',
@@ -348,7 +349,8 @@ export class HostDashboardComponent implements OnInit {
   constructor(
     private bookingService: BookingService,
     private visitService: VisitService,
-    private propertyService: PropertyService
+    private propertyService: PropertyService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -394,7 +396,7 @@ export class HostDashboardComponent implements OnInit {
       error: (err) => {
         console.error('Error al eliminar:', err);
         this.deleting = false;
-        alert('Error al eliminar la propiedad.');
+        this.toastService.show('Error al eliminar la propiedad.', 'error');
       }
     });
   }
