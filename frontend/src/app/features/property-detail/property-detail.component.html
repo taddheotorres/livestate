@@ -1,4 +1,4 @@
-<div class="detail-container" *ngIf="!loading && property">
+<div class="detail-container" *ngIf="property">
   
   <div class="content-grid">
     
@@ -7,14 +7,14 @@
       <a routerLink="/catalog" class="back-link">&larr; Volver a la colección</a>
       
       <!-- Galería Inmersiva Premium de Fotos al lado izquierdo -->
-      <div class="property-gallery" *ngIf="property.images && property.images.length > 0">
+      <div class="property-gallery" *ngIf="hasImages">
         <div class="main-image-wrapper">
           <img [src]="activeImageUrl" [alt]="property.title" class="gallery-main-image">
         </div>
         
-        <div class="thumbnails-container" *ngIf="property.images.length > 1">
-          <div 
-            *ngFor="let img of property.images" 
+        <div class="thumbnails-container" *ngIf="hasMultipleImages">
+          <div class="thumbnail-item" 
+            *ngFor="let img of propertyImages" 
             class="thumbnail-card"
             [class.active]="img.imageUrl === activeImageUrl"
             (click)="setActiveImage(img.imageUrl)"
@@ -68,13 +68,13 @@
           <button class="btn btn-outline btn-block" (click)="openVisitDrawer()">Programar Visita</button>
         </div>
 
-        <div class="host-info" [routerLink]="['/agents', property.agent?.id || 1]" style="cursor: pointer;">
-          <div class="host-avatar">{{ (property.agent?.name || 'Nelva Torres').charAt(0) }}</div>
+        <div class="host-info" [routerLink]="['/agents', hostId]" style="cursor: pointer;">
+          <div class="host-avatar">{{ hostName.charAt(0) }}</div>
           <div class="host-details">
-            <p class="host-name">Anfitrión: {{ property.agent?.name || 'Nelva Torres' }}</p>
+            <p class="host-name">Anfitrión: {{ hostName }}</p>
             <div class="host-rating-inline" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; color: #E6B044; margin-top: 0.2rem;">
               <span>★</span>
-              <span style="color: var(--text-primary); font-weight: 500;">{{ property.agent?.rating || '4.9' }}</span>
+              <span style="color: var(--text-primary); font-weight: 500;">{{ hostRating }}</span>
               <span style="color: var(--text-muted); font-size: 0.75rem;">· Recomendado</span>
             </div>
           </div>
@@ -94,9 +94,8 @@
 <!-- ======================= -->
 
 <!-- Drawer Overlay -->
-<div class="drawer-overlay" *ngIf="activeDrawer !== 'NONE'" (click)="closeDrawer()"></div>
+<div class="drawer-overlay" *ngIf="activeDrawer !== 'NONE' && property" (click)="closeDrawer()"></div>
 
-<!-- BOOKING DRAWER -->
 <div class="drawer" [class.open]="activeDrawer === 'BOOKING'">
   <div class="drawer-header">
     <h3>Solicitar Renta</h3>
@@ -105,10 +104,10 @@
   
   <div class="drawer-content" *ngIf="!bookingSuccess">
     <div class="booking-summary">
-      <img [src]="property?.images[0]?.imageUrl" alt="prop" class="summary-img">
+      <img [src]="primaryImageUrl" alt="prop" class="summary-img">
       <div class="summary-info">
         <h4>{{ property?.title }}</h4>
-        <p>${{ property?.price | number }} / mes</p>
+        <p>${{ (property?.price || 0) | number }} / mes</p>
       </div>
     </div>
 
@@ -163,11 +162,11 @@
 
   <div class="drawer-content" *ngIf="activeTab === 'INFO' && !visitSuccess">
     <div class="agent-contact-card">
-      <div class="host-avatar large">{{ property?.agent?.name?.charAt(0) }}</div>
-      <h4>{{ property?.agent?.name }}</h4>
-      <p class="agent-email">{{ property?.agent?.email }}</p>
+      <div class="host-avatar large">{{ hostName.charAt(0) }}</div>
+      <h4>{{ hostName }}</h4>
+      <p class="agent-email">{{ property?.agent?.email || '' }}</p>
       <p class="agent-phone" *ngIf="property?.agent?.phone">📞 {{ property?.agent?.phone }}</p>
-      <a [href]="'mailto:' + property?.agent?.email" class="btn btn-outline btn-sm mt-2">Enviar Correo</a>
+      <a [href]="'mailto:' + (property?.agent?.email || '')" class="btn btn-outline btn-sm mt-2">Enviar Correo</a>
     </div>
 
     <form (ngSubmit)="submitVisit()" #visitForm="ngForm" class="drawer-form mt-4">
@@ -197,12 +196,12 @@
   <!-- CHAT TAB -->
   <div class="drawer-content chat-container" *ngIf="activeTab === 'CHAT'">
     <div class="chat-messages" #chatScroll>
-      <div class="message" *ngFor="let msg of messages" [class.sent]="msg.sender?.id !== property?.agent?.id">
+      <div class="message" *ngFor="let msg of messages" [class.sent]="isOwnMessage(msg)">
         <p>{{ msg.content }}</p>
         <span class="msg-time">{{ msg.createdAt | date:'shortTime' }}</span>
       </div>
       <div class="empty-chat" *ngIf="messages.length === 0">
-        Inicia la conversación con {{ property?.agent?.name }}
+        Inicia la conversación con {{ hostName }}
       </div>
     </div>
     <div class="chat-input-area">

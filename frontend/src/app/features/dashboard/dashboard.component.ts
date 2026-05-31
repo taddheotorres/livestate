@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
+import { PropertyService } from '../../core/services/property.service';
+import { User } from '../../core/models/user.model';
 import { TenantDashboardComponent } from './tenant-dashboard/tenant-dashboard.component';
 import { HostDashboardComponent } from './host-dashboard/host-dashboard.component';
 
@@ -37,7 +40,7 @@ import { HostDashboardComponent } from './host-dashboard/host-dashboard.componen
   styles: [`
     .dashboard-wrapper {
       display: flex;
-      min-height: calc(100vh - 64px); /* Menos navbar */
+      min-height: calc(100vh - 64px);
       max-width: 1400px;
       margin: 0 auto;
     }
@@ -117,16 +120,41 @@ import { HostDashboardComponent } from './host-dashboard/host-dashboard.componen
     }
   `]
 })
-export class DashboardComponent implements OnInit {
-  user: any = null;
+export class DashboardComponent implements OnInit, OnDestroy {
+  user: User | null = null;
   loading = true;
+  private subs: Subscription[] = [];
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private propertyService: PropertyService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    this.authService.currentUser$.subscribe(u => {
-      this.user = u;
-      this.loading = false;
-    });
+    this.subs.push(
+      this.authService.isLoggedIn$.subscribe(isLoggedIn => {
+        if (isLoggedIn) {
+          this.subs.push(
+            this.propertyService.getCurrentUser().subscribe({
+              next: (user) => {
+                this.user = user;
+                this.loading = false;
+              },
+              error: () => {
+                this.loading = false;
+              }
+            })
+          );
+        } else {
+          this.loading = false;
+          this.router.navigate(['/login']);
+        }
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
   }
 }

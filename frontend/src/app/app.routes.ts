@@ -1,24 +1,15 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './features/home/home.component';
-import { PropertyDetailComponent } from './features/property-detail/property-detail.component';
-import { PropertyFormComponent } from './features/property-form/property-form.component';
-import { LoginComponent } from './features/auth/login/login.component';
-import { RegisterComponent } from './features/auth/register/register.component';
-import { AgentProfileComponent } from './features/agent-profile/agent-profile.component';
-import { CatalogComponent } from './features/catalog/catalog.component';
-import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'catalog', component: CatalogComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'login', component: LoginComponent },
-
-  { path: 'register', component: RegisterComponent },
-  { path: 'properties/new', component: PropertyFormComponent, canActivate: [authGuard] },
-  { path: 'properties/:id/edit', component: PropertyFormComponent, canActivate: [authGuard] },
-  { path: 'properties/:id', component: PropertyDetailComponent },
-  { path: 'agents/:id', component: AgentProfileComponent },
+  { path: '', loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent) },
+  { path: 'catalog', loadComponent: () => import('./features/catalog/catalog.component').then(m => m.CatalogComponent) },
+  { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent), canActivate: [authGuard] },
+  { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
+  { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
+  { path: 'properties/new', loadComponent: () => import('./features/property-form/property-form.component').then(m => m.PropertyFormComponent), canActivate: [authGuard] },
+  { path: 'properties/:id/edit', loadComponent: () => import('./features/property-form/property-form.component').then(m => m.PropertyFormComponent), canActivate: [authGuard] },
+  { path: 'properties/:id', loadComponent: () => import('./features/property-detail/property-detail.component').then(m => m.PropertyDetailComponent) },
+  { path: 'agents/:id', loadComponent: () => import('./features/agent-profile/agent-profile.component').then(m => m.AgentProfileComponent) },
   { path: '**', redirectTo: '' }
 ];

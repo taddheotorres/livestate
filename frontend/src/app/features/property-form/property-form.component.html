@@ -28,7 +28,7 @@
         <!-- Galería Inmersiva en Vivo -->
         <div class="property-gallery" *ngIf="uploadedImages.length > 0">
           <div class="main-image-wrapper">
-            <img [src]="uploadedImages[activePreviewImageIndex]?.imageUrl" [alt]="property.title || 'Espacio'" class="gallery-main-image">
+            <img [src]="uploadedImages[activePreviewImageIndex].imageUrl" [alt]="property.title || 'Espacio'" class="gallery-main-image">
           </div>
           
           <div class="thumbnails-container" *ngIf="uploadedImages.length > 1">

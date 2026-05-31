@@ -22,5 +22,5 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findByReceiverIdOrderByCreatedAtDesc(Long receiverId);
 
     // Mensajes no leídos de un usuario
-    long countByReceiverIdAndReadFalse(Long receiverId);
+    long countByReceiverIdAndReadMessageFalse(Long receiverId);
 }

@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FavoriteService } from '../../../core/services/favorite.service';
+import { Property } from '../../../core/models/property.model';
 
 @Component({
   selector: 'app-property-card',
@@ -11,7 +12,7 @@ import { FavoriteService } from '../../../core/services/favorite.service';
   styleUrl: './property-card.component.scss'
 })
 export class PropertyCardComponent implements OnInit {
-  @Input() property: any;
+  @Input() property?: Property;
   isFavorite = false;
 
   constructor(private favoriteService: FavoriteService) {}

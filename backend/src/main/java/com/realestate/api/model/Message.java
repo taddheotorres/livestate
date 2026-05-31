@@ -39,9 +39,9 @@ public class Message {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Column(nullable = false)
+    @Column(name = "is_read", nullable = false)
     @Builder.Default
-    private boolean read = false;
+    private boolean readMessage = false;
 
     @CreationTimestamp
     @Column(updatable = false)

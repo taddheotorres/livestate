@@ -1,8 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { PropertyService } from '../../core/services/property.service';
+import { ToastService } from '../../core/services/toast.service';
+import { PropertyRequest } from '../../core/models/property.model';
+import { User } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-property-form',
@@ -11,17 +15,17 @@ import { PropertyService } from '../../core/services/property.service';
   templateUrl: './property-form.component.html',
   styleUrl: './property-form.component.scss'
 })
-export class PropertyFormComponent implements OnInit {
-  property: any = {
+export class PropertyFormComponent implements OnInit, OnDestroy {
+  property: Partial<PropertyRequest> = {
     title: '',
-    location: 'La Paz, BCS', // Valor por defecto sugerido
-    type: 'HOUSE',
-    price: null,
-    bedrooms: null,
-    bathrooms: null,
-    areaSqm: null,
+    location: 'La Paz, BCS',
+    type: 'HOUSE' as PropertyRequest['type'],
+    price: undefined,
+    bedrooms: undefined,
+    bathrooms: undefined,
+    areaSqm: undefined,
     description: '',
-    status: 'AVAILABLE'
+    status: 'AVAILABLE' as PropertyRequest['status']
   };
 
   uploadedImages: Array<{ imageUrl: string; isPrimary: boolean }> = [];
@@ -29,9 +33,10 @@ export class PropertyFormComponent implements OnInit {
   isSubmitting = false;
   activePreviewImageIndex = 0;
   isDragging = false;
-  currentUser: any = null;
+  currentUser: User | null = null;
   editMode = false;
   editId: number | null = null;
+  private subs: Subscription[] = [];
 
   // Presets de fotos de ejemplo para testing rápido
   photoPresets = [
@@ -67,7 +72,8 @@ export class PropertyFormComponent implements OnInit {
   constructor(
     private propertyService: PropertyService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -79,14 +85,20 @@ export class PropertyFormComponent implements OnInit {
       this.loadPropertyForEdit(this.editId);
     }
 
-    this.propertyService.getCurrentUser().subscribe({
-      next: (user) => {
-        this.currentUser = user;
-      },
-      error: (err) => {
-        console.warn('Usuario no autenticado para previsualización, usando Nelva Torres como fallback.', err);
-      }
-    });
+    this.subs.push(
+      this.propertyService.getCurrentUser().subscribe({
+        next: (user) => {
+          this.currentUser = user;
+        },
+        error: () => {
+          console.warn('Usuario no autenticado para previsualización.');
+        }
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   loadPropertyForEdit(id: number) {
@@ -103,9 +115,8 @@ export class PropertyFormComponent implements OnInit {
           description: data.description,
           status: data.status
         };
-        // Cargar imágenes existentes
         if (data.images && data.images.length > 0) {
-          this.uploadedImages = data.images.map((img: any) => ({
+          this.uploadedImages = data.images.map(img => ({
             imageUrl: img.imageUrl,
             isPrimary: img.isPrimary
           }));
@@ -134,8 +145,9 @@ export class PropertyFormComponent implements OnInit {
   }
 
   // Carga de imágenes locales y lectura a Base64
-  onFileSelected(event: any) {
-    const files = event.target.files;
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = input.files;
     if (files) {
       this.processFiles(files);
     }
@@ -166,10 +178,10 @@ export class PropertyFormComponent implements OnInit {
       const file = files[i];
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
-        reader.onload = (e: any) => {
+        reader.onload = () => {
           const isFirst = this.uploadedImages.length === 0;
           this.uploadedImages.push({
-            imageUrl: e.target.result,
+            imageUrl: reader.result as string,
             isPrimary: isFirst
           });
           if (isFirst) {
@@ -236,7 +248,7 @@ export class PropertyFormComponent implements OnInit {
 
     if (this.editMode && this.editId) {
       // MODO EDICIÓN
-      this.propertyService.updateProperty(this.editId, this.property).subscribe({
+      this.propertyService.updateProperty(this.editId, this.property as PropertyRequest).subscribe({
         next: (res) => {
           this.isSubmitting = false;
           this.router.navigate(['/properties', res.id]);
@@ -244,12 +256,12 @@ export class PropertyFormComponent implements OnInit {
         error: (err) => {
           console.error('Error al actualizar espacio:', err);
           this.isSubmitting = false;
-          alert('Hubo un error al actualizar el espacio.');
+          this.toastService.show('Hubo un error al actualizar el espacio.', 'error');
         }
       });
     } else {
       // MODO CREACIÓN
-      this.propertyService.createProperty(this.property).subscribe({
+      this.propertyService.createProperty(this.property as PropertyRequest).subscribe({
         next: (res) => {
           this.isSubmitting = false;
           this.router.navigate(['/properties', res.id]);
@@ -257,7 +269,7 @@ export class PropertyFormComponent implements OnInit {
         error: (err) => {
           console.error('Error al publicar espacio:', err);
           this.isSubmitting = false;
-          alert('Hubo un error al publicar el espacio. Revisa los datos de entrada.');
+          this.toastService.show('Hubo un error al publicar el espacio. Revisa los datos de entrada.', 'error');
         }
       });
     }

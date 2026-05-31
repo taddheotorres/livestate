@@ -13,7 +13,9 @@ import java.util.List;
 
 @Entity
 @Table(name = "properties")
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"images", "agent"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

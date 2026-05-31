@@ -2,12 +2,15 @@ package com.realestate.api.service;
 
 import com.realestate.api.model.Property;
 import com.realestate.api.repository.PropertyRepository;
+import com.realestate.api.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PropertyService {
@@ -20,6 +23,10 @@ public class PropertyService {
 
     public Optional<Property> getPropertyById(Long id) {
         return propertyRepository.findById(id);
+    }
+
+    public List<Property> getPropertiesByAgentId(Long agentId) {
+        return propertyRepository.findByAgentId(agentId);
     }
 
     public Property createProperty(Property property) {
@@ -53,10 +60,11 @@ public class PropertyService {
 
                     return propertyRepository.save(existing);
                 })
-                .orElseThrow(() -> new RuntimeException("Propiedad no encontrada con id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Property not found: " + id));
     }
 
     public void deleteProperty(Long id) {
+        log.info("Deleting property {}", id);
         propertyRepository.deleteById(id);
     }
 }

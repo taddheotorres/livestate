@@ -1,31 +1,28 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { Visit, VisitRequest } from '../models/visit.model';
 
 @Injectable({ providedIn: 'root' })
 export class VisitService {
-  private apiUrl = 'http://localhost:8081/api/visits';
+  private apiUrl = `${environment.apiUrl}/visits`;
 
   constructor(private http: HttpClient) {}
 
-  scheduleVisit(visit: {
-    propertyId: number;
-    scheduledDate: string;
-    scheduledTime?: string;
-    notes?: string;
-  }): Observable<any> {
-    return this.http.post<any>(this.apiUrl, visit);
+  scheduleVisit(visit: VisitRequest): Observable<Visit> {
+    return this.http.post<Visit>(this.apiUrl, visit);
   }
 
-  getMyVisits(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/my`);
+  getMyVisits(): Observable<Visit[]> {
+    return this.http.get<Visit[]>(`${this.apiUrl}/my`);
   }
 
-  getIncomingVisits(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/incoming`);
+  getIncomingVisits(): Observable<Visit[]> {
+    return this.http.get<Visit[]>(`${this.apiUrl}/incoming`);
   }
 
-  updateVisitStatus(id: number, status: 'CONFIRMED' | 'DONE' | 'CANCELLED'): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}/status`, { status });
+  updateVisitStatus(id: number, status: 'CONFIRMED' | 'DONE' | 'CANCELLED'): Observable<Visit> {
+    return this.http.put<Visit>(`${this.apiUrl}/${id}/status`, { status });
   }
 }

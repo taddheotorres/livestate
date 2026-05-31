@@ -3,12 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { Client, Message } from '@stomp/stompjs';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../../environments/environment';
+import { Message as ChatMessage, MessageRequest } from '../models/message.model';
 
 @Injectable({ providedIn: 'root' })
 export class MessageService {
-  private apiUrl = 'http://localhost:8081/api/messages';
+  private apiUrl = `${environment.apiUrl}/messages`;
   private stompClient: Client | null = null;
-  private messageSubject = new Subject<any>();
+  private messageSubject = new Subject<ChatMessage>();
 
   public onMessageReceived$ = this.messageSubject.asObservable();
 
@@ -21,8 +23,12 @@ export class MessageService {
     if (!isPlatformBrowser(this.platformId)) return;
     if (this.stompClient && this.stompClient.active) return;
 
+    const wsUrl = environment.wsUrl.startsWith('ws')
+      ? environment.wsUrl
+      : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}${environment.wsUrl}`;
+
     this.stompClient = new Client({
-      brokerURL: 'ws://localhost:8081/ws',
+      brokerURL: wsUrl,
       connectHeaders: {
         Authorization: `Bearer ${token}`
       },
@@ -53,12 +59,12 @@ export class MessageService {
     }
   }
 
-  sendMessage(msg: { receiverId: number; content: string; propertyId?: number; }): Observable<any> {
-    return this.http.post<any>(this.apiUrl, msg);
+  sendMessage(msg: MessageRequest): Observable<ChatMessage> {
+    return this.http.post<ChatMessage>(this.apiUrl, msg);
   }
 
-  getConversation(otherUserId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/conversation/${otherUserId}`);
+  getConversation(otherUserId: number): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>(`${this.apiUrl}/conversation/${otherUserId}`);
   }
 
   markAsRead(senderId: number): Observable<void> {

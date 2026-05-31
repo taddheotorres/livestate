@@ -1,81 +1,63 @@
 package com.realestate.api.controller;
 
-import com.realestate.api.model.Property;
+import com.realestate.api.dto.mapper.VisitMapper;
+import com.realestate.api.dto.request.VisitRequest;
+import com.realestate.api.dto.response.VisitResponse;
 import com.realestate.api.model.User;
-import com.realestate.api.model.Visit;
-import com.realestate.api.repository.PropertyRepository;
-import com.realestate.api.repository.UserRepository;
-import com.realestate.api.repository.VisitRepository;
+import com.realestate.api.security.SecurityUtils;
+import com.realestate.api.service.UserService;
+import com.realestate.api.service.VisitService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/visits")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class VisitController {
 
-    private final VisitRepository visitRepository;
-    private final PropertyRepository propertyRepository;
-    private final UserRepository userRepository;
+    private final VisitService visitService;
+    private final VisitMapper visitMapper;
+    private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<?> scheduleVisit(@RequestBody Map<String, Object> body) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User visitor = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    public ResponseEntity<VisitResponse> scheduleVisit(@Valid @RequestBody VisitRequest request) {
+        String userEmail = SecurityUtils.getCurrentUserEmail();
+        User visitor = userService.getCurrentUser(userEmail);
 
-        Long propertyId = Long.valueOf(body.get("propertyId").toString());
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Propiedad no encontrada"));
-
-        // El agente es el agente de la propiedad
-        User agent = property.getAgent();
-
-        Visit visit = Visit.builder()
-                .property(property)
-                .visitor(visitor)
-                .agent(agent)
-                .scheduledDate(java.time.LocalDate.parse(body.get("scheduledDate").toString()))
-                .scheduledTime(body.containsKey("scheduledTime") && body.get("scheduledTime") != null
-                        ? LocalTime.parse(body.get("scheduledTime").toString())
-                        : null)
-                .notes(body.containsKey("notes") ? body.get("notes").toString() : null)
-                .build();
-
-        return ResponseEntity.ok(visitRepository.save(visit));
+        return ResponseEntity.ok(
+                visitMapper.toResponse(
+                        visitService.scheduleVisit(
+                                visitor,
+                                request.getPropertyId(),
+                                request.getScheduledDate(),
+                                request.getScheduledTime(),
+                                request.getNotes()
+                        )
+                )
+        );
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<Visit>> getMyVisits() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        return ResponseEntity.ok(visitRepository.findByVisitorIdOrderByScheduledDateAsc(user.getId()));
+    public ResponseEntity<List<VisitResponse>> getMyVisits() {
+        String userEmail = SecurityUtils.getCurrentUserEmail();
+        User user = userService.getCurrentUser(userEmail);
+        return ResponseEntity.ok(visitMapper.toResponseList(visitService.getMyVisits(user.getId())));
     }
 
     @GetMapping("/incoming")
-    public ResponseEntity<List<Visit>> getIncomingVisits() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User agent = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        return ResponseEntity.ok(visitRepository.findByAgentIdOrderByScheduledDateAsc(agent.getId()));
+    public ResponseEntity<List<VisitResponse>> getIncomingVisits() {
+        String userEmail = SecurityUtils.getCurrentUserEmail();
+        User agent = userService.getCurrentUser(userEmail);
+        return ResponseEntity.ok(visitMapper.toResponseList(visitService.getIncomingVisits(agent.getId())));
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<Visit> updateVisitStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        Visit visit = visitRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Visita no encontrada"));
-        
-        String newStatus = body.get("status");
-        visit.setStatus(Visit.VisitStatus.valueOf(newStatus));
-        return ResponseEntity.ok(visitRepository.save(visit));
+    public ResponseEntity<VisitResponse> updateVisitStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(visitMapper.toResponse(visitService.updateVisitStatus(id, body.get("status"))));
     }
 }
