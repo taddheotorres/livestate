@@ -29,13 +29,11 @@ public class AuthService {
             throw new IllegalArgumentException("Email already registered");
         }
 
-        var role = request.getRole() != null ? request.getRole() : Role.USER;
-
         var user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(role)
+                .role(Role.USER)
                 .rating(5.0)
                 .reviewsCount(0)
                 .recommended(true)
@@ -45,8 +43,10 @@ public class AuthService {
 
         log.info("User registered: {}", request.getEmail());
         var jwtToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .refreshToken(refreshToken)
                 .name(user.getName())
                 .email(user.getEmail())
                 .build();
@@ -65,8 +65,31 @@ public class AuthService {
 
         log.info("User logged in: {}", request.getEmail());
         var jwtToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .refreshToken(refreshToken)
+                .name(user.getName())
+                .email(user.getEmail())
+                .build();
+    }
+
+    public AuthenticationResponse refreshToken(String refreshToken) {
+        if (!jwtService.isRefreshTokenValid(refreshToken)) {
+            throw new IllegalArgumentException("Invalid or expired refresh token");
+        }
+
+        String userEmail = jwtService.extractUsername(refreshToken);
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        var newToken = jwtService.generateToken(user);
+        var newRefreshToken = jwtService.generateRefreshToken(user);
+
+        log.info("Token refreshed for user: {}", userEmail);
+        return AuthenticationResponse.builder()
+                .token(newToken)
+                .refreshToken(newRefreshToken)
                 .name(user.getName())
                 .email(user.getEmail())
                 .build();

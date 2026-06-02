@@ -1,6 +1,7 @@
 package com.realestate.api.service;
 
 import com.realestate.api.exception.ResourceNotFoundException;
+import com.realestate.api.exception.UnauthorizedException;
 import com.realestate.api.model.Booking;
 import com.realestate.api.model.Property;
 import com.realestate.api.model.User;
@@ -53,11 +54,15 @@ public class BookingService {
     }
 
     @Transactional
-    public Booking updateBookingStatus(Long bookingId, String status) {
+    public Booking updateBookingStatus(Long bookingId, String status, String userEmail) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found: " + bookingId));
+        String agentEmail = booking.getProperty().getAgent().getEmail();
+        if (!agentEmail.equals(userEmail)) {
+            throw new UnauthorizedException("You are not the agent of this property");
+        }
         booking.setStatus(Booking.BookingStatus.valueOf(status));
-        log.info("Booking {} status updated to {}", bookingId, status);
+        log.info("Booking {} status updated to {} by {}", bookingId, status, userEmail);
         return bookingRepository.save(booking);
     }
 }

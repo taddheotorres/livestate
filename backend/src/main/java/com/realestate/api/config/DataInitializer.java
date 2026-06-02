@@ -5,6 +5,7 @@ import com.realestate.api.repository.PropertyRepository;
 import com.realestate.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,9 @@ public class DataInitializer implements CommandLineRunner {
         private final PropertyRepository propertyRepository;
         private final PasswordEncoder passwordEncoder;
 
+        @Value("${app.seed-password:seedDev123}")
+        private String seedPassword;
+
         @Override
         public void run(String... args) throws Exception {
                 // Solo ejecutar seeding si la BD no tiene propiedades aún
@@ -36,7 +40,7 @@ public class DataInitializer implements CommandLineRunner {
                                         User newAgent = User.builder()
                                                         .name("Nelva Torres")
                                                         .email("nelva@livestate.com")
-                                                        .password(passwordEncoder.encode("nelva123"))
+                                                        .password(passwordEncoder.encode(seedPassword))
                                                         .role(Role.AGENT)
                                                         .rating(4.9)
                                                         .reviewsCount(48)

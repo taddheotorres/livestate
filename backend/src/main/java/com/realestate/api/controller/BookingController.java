@@ -59,6 +59,7 @@ public class BookingController {
 
     @PutMapping("/{id}/status")
     public ResponseEntity<BookingResponse> updateBookingStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(bookingMapper.toResponse(bookingService.updateBookingStatus(id, body.get("status"))));
+        String userEmail = SecurityUtils.getCurrentUserEmail();
+        return ResponseEntity.ok(bookingMapper.toResponse(bookingService.updateBookingStatus(id, body.get("status"), userEmail)));
     }
 }
