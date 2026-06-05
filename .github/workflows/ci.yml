@@ -5,6 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   backend:
@@ -48,11 +49,6 @@ jobs:
       - name: Install dependencies
         working-directory: frontend
         run: npm ci
-
-      - name: Lint
-        working-directory: frontend
-        run: npx ng lint
-        continue-on-error: true
 
       - name: Build
         working-directory: frontend
@@ -99,7 +95,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy via SSH
-        if: secrets.DEPLOY_HOST != ''
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        if: env.DEPLOY_HOST != ''
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_HOST }}
