@@ -1,5 +1,6 @@
 package com.realestate.api.dto.mapper;
 
+import com.realestate.api.dto.request.ImageRequest;
 import com.realestate.api.dto.request.PropertyRequest;
 import com.realestate.api.dto.response.ImageResponse;
 import com.realestate.api.dto.response.PropertyResponse;
@@ -20,7 +21,19 @@ public interface PropertyMapper {
     @Mapping(target = "agent", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "images", qualifiedByName = "toPropertyImageList")
     Property toEntity(PropertyRequest request);
+
+    @Named("toPropertyImage")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "property", ignore = true)
+    PropertyImage toPropertyImage(ImageRequest request);
+
+    @Named("toPropertyImageList")
+    default List<PropertyImage> toPropertyImageList(List<ImageRequest> images) {
+        if (images == null) return List.of();
+        return images.stream().map(this::toPropertyImage).toList();
+    }
 
     @Mapping(target = "agent", source = "agent", qualifiedByName = "toUserSummary")
     @Mapping(target = "images", source = "images", qualifiedByName = "toImageResponseList")

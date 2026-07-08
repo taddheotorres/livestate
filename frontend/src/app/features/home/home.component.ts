@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { PropertyCardComponent } from '../../shared/components/property-card/property-card.component';
 import { PropertyService } from '../../core/services/property.service';
+import { Property } from '../../core/models/property.model';
 
 @Component({
   selector: 'app-home',
@@ -12,7 +13,7 @@ import { PropertyService } from '../../core/services/property.service';
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  featuredProperties: any[] = [];
+  featuredProperties: Property[] = [];
 
   // Carrusel Hero — slides con propertyId para navegación directa
   // Los IDs corresponden al orden de inserción del DataInitializer: 1=GlamHouse, 2=Palmas, 3=ChulaVista
@@ -31,7 +32,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   ];
 
   currentSlide = 0;
-  private slideInterval: any;
+  private slideInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(
     private propertyService: PropertyService,

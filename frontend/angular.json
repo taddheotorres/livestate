@@ -36,7 +36,8 @@
               "src/styles.scss"
             ],
             "scripts": [],
-            "prerender": false
+            "prerender": false,
+            "allowedCommonJsDependencies": ["@stomp/stompjs"]
           },
           "configurations": {
             "production": {
@@ -75,6 +76,9 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          },
           "configurations": {
             "production": {
               "buildTarget": "frontend:build:production"

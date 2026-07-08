@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PropertyCardComponent } from '../../shared/components/property-card/property-card.component';
 import { PropertyService } from '../../core/services/property.service';
+import { Property } from '../../core/models/property.model';
 
 @Component({
   selector: 'app-catalog',
@@ -13,8 +14,8 @@ import { PropertyService } from '../../core/services/property.service';
   styleUrl: './catalog.component.scss'
 })
 export class CatalogComponent implements OnInit {
-  allProperties: any[] = [];
-  filteredProperties: any[] = [];
+  allProperties: Property[] = [];
+  filteredProperties: Property[] = [];
   loading = true;
 
   // Filtros

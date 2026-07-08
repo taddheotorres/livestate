@@ -12,5 +12,5 @@ import { ToastComponent } from './shared/components/toast/toast.component';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'Luxe Estates';
+  title = 'Livestate';
 }
