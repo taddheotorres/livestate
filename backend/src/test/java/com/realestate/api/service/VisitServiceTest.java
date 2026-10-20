@@ -1,6 +1,7 @@
 package com.realestate.api.service;
 
 import com.realestate.api.config.AbstractIntegrationTest;
+import com.realestate.api.exception.UnauthorizedException;
 import com.realestate.api.model.*;
 import com.realestate.api.repository.PropertyRepository;
 import com.realestate.api.repository.UserRepository;
@@ -80,5 +81,24 @@ class VisitServiceTest extends AbstractIntegrationTest {
         );
 
         assertEquals(1, visitService.getMyVisits(visitor.getId()).size());
+    }
+
+    @Test
+    void shouldOnlyLetAgentConfirmAndVisitorCancel() {
+        Visit visit = visitService.scheduleVisit(
+                visitor, property.getId(), LocalDate.now().plusDays(3), LocalTime.of(10, 0), null);
+        User agent = property.getAgent();
+        User stranger = userRepository.save(User.builder()
+                .name("Stranger").email("stranger@test.com").password("pwd").role(Role.USER).build());
+
+        assertThrows(UnauthorizedException.class,
+                () -> visitService.updateVisitStatus(stranger, visit.getId(), "CANCELLED"));
+        assertThrows(UnauthorizedException.class,
+                () -> visitService.updateVisitStatus(visitor, visit.getId(), "CONFIRMED"));
+
+        assertEquals(Visit.VisitStatus.CONFIRMED,
+                visitService.updateVisitStatus(agent, visit.getId(), "CONFIRMED").getStatus());
+        assertEquals(Visit.VisitStatus.CANCELLED,
+                visitService.updateVisitStatus(visitor, visit.getId(), "CANCELLED").getStatus());
     }
 }

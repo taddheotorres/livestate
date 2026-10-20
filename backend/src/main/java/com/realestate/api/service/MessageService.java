@@ -1,5 +1,6 @@
 package com.realestate.api.service;
 
+import com.realestate.api.dto.mapper.MessageMapper;
 import com.realestate.api.exception.ResourceNotFoundException;
 import com.realestate.api.model.Message;
 import com.realestate.api.model.User;
@@ -21,6 +22,7 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final PropertyRepository propertyRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final MessageMapper messageMapper;
 
     @Transactional
     public Message sendMessage(User sender, User receiver, String content, Long propertyId) {
@@ -37,10 +39,11 @@ public class MessageService {
         Message savedMsg = messageRepository.save(msg);
         log.info("Message sent: from={} to={}", sender.getId(), receiver.getId());
 
+        // STOMP sessions are keyed by the JWT subject (the email), not the numeric id
         messagingTemplate.convertAndSendToUser(
-                receiver.getId().toString(),
+                receiver.getEmail(),
                 "/queue/messages",
-                savedMsg
+                messageMapper.toResponse(savedMsg)
         );
 
         return savedMsg;
