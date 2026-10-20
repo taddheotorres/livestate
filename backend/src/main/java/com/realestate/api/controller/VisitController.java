@@ -58,6 +58,7 @@ public class VisitController {
 
     @PutMapping("/{id}/status")
     public ResponseEntity<VisitResponse> updateVisitStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(visitMapper.toResponse(visitService.updateVisitStatus(id, body.get("status"))));
+        User actor = userService.getCurrentUser(SecurityUtils.getCurrentUserEmail());
+        return ResponseEntity.ok(visitMapper.toResponse(visitService.updateVisitStatus(actor, id, body.get("status"))));
     }
 }

@@ -63,6 +63,14 @@ Aplicación full-stack para rentar y comprar propiedades, con catálogo visual, 
 ### Stripe
 Usa una tarjeta de prueba de Stripe: `4242 4242 4242 4242`, cualquier fecha futura, cualquier CVC.
 
+La reserva se confirma cuando Stripe avisa del pago al webhook `POST /api/payments/webhook`
+(evento `checkout.session.completed`). Configura su secreto en `STRIPE_WEBHOOK_SECRET`.
+En local puedes reenviar los eventos con la CLI de Stripe:
+
+```bash
+stripe listen --forward-to localhost:8081/api/payments/webhook
+```
+
 ## Inicio rápido con Docker
 
 ```bash
@@ -174,6 +182,7 @@ livestate/
 | POST | `/api/visits` | JWT | Agendar visita |
 | POST | `/api/messages` | JWT | Enviar mensaje |
 | POST | `/api/payments/create-checkout-session` | JWT | Cobro Stripe |
+| POST | `/api/payments/webhook` | Firma Stripe | Confirma la reserva pagada |
 | POST | `/api/favorites/{id}/toggle` | JWT | Favorito on/off |
 | GET | `/api/users/me` | JWT | Perfil actual |
 | PUT | `/api/users/me` | JWT | Editar perfil |

@@ -35,7 +35,6 @@ public class BookingController {
                 request.getPropertyId(),
                 request.getStartDate(),
                 request.getEndDate(),
-                request.getTotalAmount(),
                 Booking.PaymentMethod.valueOf(request.getPaymentMethod()),
                 request.getNotes()
         );
@@ -59,6 +58,7 @@ public class BookingController {
 
     @PutMapping("/{id}/status")
     public ResponseEntity<BookingResponse> updateBookingStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(bookingMapper.toResponse(bookingService.updateBookingStatus(id, body.get("status"))));
+        User actor = userService.getCurrentUser(SecurityUtils.getCurrentUserEmail());
+        return ResponseEntity.ok(bookingMapper.toResponse(bookingService.updateBookingStatus(actor, id, body.get("status"))));
     }
 }

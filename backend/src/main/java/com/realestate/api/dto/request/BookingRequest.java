@@ -27,8 +27,7 @@ public class BookingRequest {
     @Future(message = "End date must be in the future")
     private LocalDate endDate;
 
-    @NotNull(message = "Total amount is required")
-    @Positive(message = "Total amount must be positive")
+    // ignored: the server computes the amount from the property price
     private BigDecimal totalAmount;
 
     @NotNull(message = "Payment method is required")
